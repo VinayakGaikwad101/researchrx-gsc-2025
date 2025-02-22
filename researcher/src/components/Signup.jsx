@@ -153,16 +153,16 @@ const Signup = () => {
               </select>
             </div>
             <div>
-              <label htmlFor="hospital-id" className="sr-only">
-                Hospital ID
+              <label htmlFor="specialization" className="sr-only">
+                Specialization
               </label>
               <input
-                id="hospital-id"
+                id="specialization"
                 name="specialization"
                 type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                placeholder="Hospital ID"
+                placeholder="Specialization"
                 value={specialization}
                 onChange={(e) => setSpecialization(e.target.value)}
               />

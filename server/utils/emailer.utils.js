@@ -5,7 +5,7 @@ import {
   Contact_Form_Response_Template,
   Researcher_Password_Reset_Email_Template,
   Patient_Password_Reset_Email_Template,
-} from "../libs/EmailTemplate.js";
+} from "../libs/email.template.js";
 import { transporter } from "../config/email.config.js";
 
 export const sendVerificationCode = async (email, verificationCode) => {

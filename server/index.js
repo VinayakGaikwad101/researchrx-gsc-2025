@@ -24,7 +24,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true })); // for form submissions
 
-app.use("/api/messages", messageRouter);
 app.use("/api/auth", authPatientRouter);
 app.use("/api/main/auth", authResearcherRouter);
 

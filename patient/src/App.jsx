@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import VerifyEmail from "./components/VerifyEmail";
 import Profile from "./components/Profile";
+import MedicalReports from "./components/MedicalReports";
 import { useAuthStore } from "./store/useAuthStore";
 import AboutUs from "./components/AboutUs";
 import ContactUs from "./components/ContactUs";
@@ -29,6 +30,10 @@ const App = () => {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Login />} />
+        <Route
+          path="/medical-reports"
+          element={authUser ? <MedicalReports /> : <Login />}
+        />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>

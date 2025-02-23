@@ -22,7 +22,6 @@ const useMedicalReportStore = create((set) => ({
       );
       const data = await response.json();
       if (data.success) {
-        console.log("Fetched medical reports");
         set({ medicalReports: data.reports, isLoading: false });
       } else {
         set({ error: data.message, isLoading: false });

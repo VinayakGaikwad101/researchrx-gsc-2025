@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Trash, Edit, Eye } from "lucide-react";
 import useMedicalReportStore from "../store/useMedicalReportStore";
-import { Document, Page } from "react-pdf";
-import "@react-pdf-viewer/core/lib/styles/index.css";
 
 const MedicalReports = () => {
   const {
@@ -15,13 +13,14 @@ const MedicalReports = () => {
     error,
   } = useMedicalReportStore();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [newReportName, setNewReportName] = useState("");
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
-  const [selectedPdf, setSelectedPdf] = useState(null); // State for selected PDF
-  const fileInputRef = useRef(null); // Ref for the file input element
+  const [selectedPdf, setSelectedPdf] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchMedicalReports();
@@ -30,14 +29,14 @@ const MedicalReports = () => {
   const handleRename = async () => {
     if (selectedReport && newReportName) {
       await renameMedicalReport(selectedReport._id, newReportName);
-      setIsModalOpen(false);
-      setNewReportName(""); // Reset the new report name state after renaming
+      setIsRenameModalOpen(false);
+      setNewReportName("");
     }
   };
 
   const handleDelete = async (id) => {
     await deleteMedicalReport(id);
-    setIsModalOpen(false);
+    setIsRenameModalOpen(false);
     setUploadFile(null);
   };
 
@@ -62,59 +61,27 @@ const MedicalReports = () => {
     formData.append("name", newReportName || uploadFile.name);
 
     await uploadMedicalReport(formData);
-    setUploadFile(null); // Reset the upload file state after upload
-    setNewReportName(""); // Reset the report name state after upload
+    setUploadFile(null);
+    setNewReportName("");
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset the file input field
+      fileInputRef.current.value = "";
     }
   };
 
   const handleView = (pdfUrl) => {
+    console.log("PDF URL:", pdfUrl); // Debugging line
     setSelectedPdf(pdfUrl);
-    setIsModalOpen(true);
+    setIsViewModalOpen(true);
   };
-
   return (
     <div className="container mx-auto">
       <h1 className="text-2xl font-bold mb-4">Medical Reports</h1>
-      {isLoading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {medicalReports.map((report) => (
-          <div key={report._id} className="border p-4 rounded-lg">
-            <h2 className="text-xl font-semibold">{report.name}</h2>
-            <p>{report.description}</p>
-            <button
-              onClick={() => handleView(report.pdfUrl)} // Pass PDF URL to view handler
-              className="mt-2 p-2 bg-green-500 text-white rounded flex items-center"
-            >
-              <Eye className="m-1" />
-            </button>
-            <button
-              onClick={() => {
-                setSelectedReport(report);
-                setNewReportName(report.name);
-                setIsModalOpen(true);
-              }}
-              className="mt-2 p-2 bg-blue-500 text-white rounded flex items-center"
-            >
-              <Edit className="m-1" />
-            </button>
-            <button
-              onClick={() => handleDelete(report._id)}
-              className="mt-2 p-2 bg-red-500 text-white rounded flex items-center"
-            >
-              <Trash className="m-1" />
-            </button>
-          </div>
-        ))}
-      </div>
       <div className="mt-4">
         <input
           type="file"
           onChange={handleFileChange}
-          ref={fileInputRef} // Attach the ref to the file input element
+          ref={fileInputRef}
           className="block w-full text-sm text-gray-500
             file:mr-4 file:py-2 file:px-4
             file:rounded-full file:border-0
@@ -140,35 +107,96 @@ const MedicalReports = () => {
           {isLoading ? "Uploading..." : "Upload Report"}
         </button>
       </div>
-      {isModalOpen && (
+      {isLoading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+        {medicalReports.map((report) => (
+          <div
+            key={report._id}
+            className="border p-4 rounded-lg flex items-center justify-between"
+          >
+            <div>
+              <h2 className="text-xl font-semibold">{report.name}</h2>
+              <p>{report.description}</p>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleView(report.url)}
+                className="p-2 bg-green-500 text-white rounded flex items-center"
+              >
+                <Eye className="m-1" />
+                View
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedReport(report);
+                  setNewReportName(report.name);
+                  setIsRenameModalOpen(true);
+                }}
+                className="p-2 bg-blue-500 text-white rounded flex items-center"
+              >
+                <Edit className="m-1" />
+                Rename
+              </button>
+              <button
+                onClick={() => handleDelete(report._id)}
+                className="p-2 bg-red-500 text-white rounded flex items-center"
+              >
+                <Trash className="m-1" />
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {isViewModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg">
-            {selectedPdf ? (
-              <div className="w-full h-full overflow-auto">
-                <Document file={selectedPdf}>
-                  <Page pageNumber={1} />
-                </Document>
-              </div>
-            ) : (
-              <>
-                <h2 className="text-xl font-semibold mb-4">Rename Report</h2>
-                <input
-                  type="text"
-                  value={newReportName}
-                  onChange={(e) => setNewReportName(e.target.value)}
-                  placeholder="New report name"
-                  className="block w-full p-2 border rounded mb-4"
-                />
-                <button
-                  onClick={handleRename}
-                  className="p-2 bg-blue-500 text-white rounded"
-                >
-                  Rename
-                </button>
-              </>
-            )}
+            <div
+              className="w-full h-full overflow-auto"
+              style={{ maxHeight: "80vh" }}
+            >
+              {selectedPdf ? (
+                <iframe
+                  src={selectedPdf}
+                  title="PDF Viewer"
+                  width="1000px"
+                  height="800px"
+                ></iframe>
+              ) : (
+                <p>No PDF file specified.</p>
+              )}
+            </div>
             <button
-              onClick={() => setIsModalOpen(false)}
+              onClick={() => setIsViewModalOpen(false)}
+              className="mt-4 p-2 bg-gray-500 text-white rounded"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isRenameModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">Rename Report</h2>
+            <input
+              type="text"
+              value={newReportName}
+              onChange={(e) => setNewReportName(e.target.value)}
+              placeholder="New report name"
+              className="block w-full p-2 border rounded mb-4"
+            />
+            <button
+              onClick={handleRename}
+              className="p-2 bg-blue-500 text-white rounded"
+            >
+              Rename
+            </button>
+            <button
+              onClick={() => setIsRenameModalOpen(false)}
               className="mt-4 p-2 bg-gray-500 text-white rounded"
             >
               Close

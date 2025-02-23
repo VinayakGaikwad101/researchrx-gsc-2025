@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Trash } from "lucide-react";
+import { Trash, Edit, Eye } from "lucide-react";
 import useMedicalReportStore from "../store/useMedicalReportStore";
 import { Document, Page } from "react-pdf";
 import "@react-pdf-viewer/core/lib/styles/index.css";
@@ -87,26 +87,19 @@ const MedicalReports = () => {
             <p>{report.description}</p>
             <button
               onClick={() => handleView(report.pdfUrl)} // Pass PDF URL to view handler
-              className="mt-2 p-2 bg-green-500 text-white rounded"
+              className="mt-2 p-2 bg-green-500 text-white rounded flex items-center"
             >
-              View
-            </button>
-            <button
-              onClick={() => {
-                /* Implement edit logic here */
-              }}
-              className="mt-2 p-2 bg-yellow-500 text-white rounded"
-            >
-              Edit
+              <Eye className="m-1" />
             </button>
             <button
               onClick={() => {
                 setSelectedReport(report);
+                setNewReportName(report.name);
                 setIsModalOpen(true);
               }}
-              className="mt-2 p-2 bg-blue-500 text-white rounded"
+              className="mt-2 p-2 bg-blue-500 text-white rounded flex items-center"
             >
-              Rename
+              <Edit className="m-1" />
             </button>
             <button
               onClick={() => handleDelete(report._id)}

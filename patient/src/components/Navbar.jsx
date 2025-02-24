@@ -77,6 +77,12 @@ const Navbar = () => {
                   >
                     Reports
                   </Link>
+                  <Link
+                    to="/bmi"
+                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    BMI
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"

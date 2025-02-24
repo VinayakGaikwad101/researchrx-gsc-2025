@@ -11,6 +11,7 @@ import Signup from "./components/Signup";
 import VerifyEmail from "./components/VerifyEmail";
 import Profile from "./components/Profile";
 import MedicalReports from "./components/MedicalReports";
+import BMI from "./components/BMI";
 import { useAuthStore } from "./store/useAuthStore";
 import AboutUs from "./components/AboutUs";
 import ContactUs from "./components/ContactUs";
@@ -34,6 +35,7 @@ const App = () => {
           path="/medical-reports"
           element={authUser ? <MedicalReports /> : <Login />}
         />
+        <Route path="/bmi" element={authUser ? <BMI /> : <Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>

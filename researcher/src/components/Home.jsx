@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import logoComponent from "../assets/logoComponent.png";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -11,10 +12,17 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-teal-100 to-blue-200 flex items-center justify-center">
       <div className="max-w-3xl bg-white shadow-2xl rounded-lg overflow-hidden">
         <div className="md:flex">
+          <div className="md:flex-shrink-0">
+            <img
+              className="h-full w-full object-contain"
+              src={logoComponent}
+              alt="Logo"
+            />
+          </div>
           <div className="md:flex-shrink-0"></div>
           <div className="p-8">
             <div className="uppercase tracking-wide text-sm text-teal-600 font-semibold">
-            ResearchRX
+              ResearchRX
             </div>
             <h1 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
               Welcome to ResearchRX

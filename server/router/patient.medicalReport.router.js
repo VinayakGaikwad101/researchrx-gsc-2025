@@ -1,5 +1,4 @@
 import express from "express";
-import mongoose from "mongoose";
 import { protectRoute } from "../middlewares/protectRoute.middleware.js";
 
 import {

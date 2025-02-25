@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import authPatientRouter from "./router/patient.router.js";
 import authResearcherRouter from "./router/researcher.router.js";
 import patientMedicalReportRouter from "./router/patient.medicalReport.router.js";
+import researcherMedicalReportRouter from "./router/researcher.medicalReport.router.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(urlencoded({ extended: true })); // for form submissions
 app.use("/api/auth", authPatientRouter);
 app.use("/api/main/auth", authResearcherRouter);
 app.use("/api/medical/patient", patientMedicalReportRouter);
+app.use("/api/medical/researcher", researcherMedicalReportRouter);
 
 mongoDBConnect();
 app.listen(process.env.PORT, () => {

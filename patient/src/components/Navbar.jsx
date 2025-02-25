@@ -83,6 +83,12 @@ const Navbar = () => {
                   >
                     BMI
                   </Link>
+                  <Link
+                    to="/self-diagnose"
+                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Diagnose
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
@@ -199,6 +205,22 @@ const Navbar = () => {
                       className="text-white hover:bg-blue-50  hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                     >
                       Reports
+                    </Link>
+                  </motion.div>
+                  <motion.div variants={menuItemVariants}>
+                    <Link
+                      to="/bmi"
+                      className="text-white hover:bg-blue-50  hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                    >
+                      BMI
+                    </Link>
+                  </motion.div>
+                  <motion.div variants={menuItemVariants}>
+                    <Link
+                      to="/self-diagnose"
+                      className="text-white hover:bg-blue-50  hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                    >
+                      Diagnose
                     </Link>
                   </motion.div>
                   <motion.div variants={menuItemVariants}>

@@ -26,7 +26,7 @@ export const useBMIStore = create((set) => ({
         {
           headers: {
             "x-rapidapi-key": import.meta.env.VITE_x_rapidapi_key,
-            "x-rapidapi-host": import.meta.env.VITE_x_rapidapi_host,
+            "x-rapidapi-host": import.meta.env.VITE_x_rapidapi_host_BMI,
           },
         }
       );

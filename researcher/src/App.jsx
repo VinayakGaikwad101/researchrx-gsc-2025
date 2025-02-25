@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import VerifyEmail from "./components/VerifyEmail";
 import Profile from "./components/Profile";
+import MedicalReports from "./components/MedicalReports";
 import { useAuthStore } from "./store/useAuthStore";
 import ForgotPassword from "./components/ForgotPassword";
 
@@ -26,6 +27,10 @@ const App = () => {
         <Route path="/otp-verification" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/profile" element={authUser ? <Profile /> : <Login />} />
+        <Route
+          path="/medical-reports"
+          element={authUser ? <MedicalReports /> : <Login />}
+        />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>
       <Toaster />

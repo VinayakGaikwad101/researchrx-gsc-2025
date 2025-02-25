@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/useAuthStore";
+import PacmanLoader from "react-spinners/PacmanLoader";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,10 +47,11 @@ const Navbar = () => {
     open: { opacity: 1, y: 0 },
   };
 
+  // loader
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <PacmanLoader size={50} color={"#36D7B7"} />
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 
 const Signup = () => {
@@ -166,6 +166,14 @@ const Signup = () => {
             >
               {loading ? "Signing up..." : "Sign Up"}
             </button>
+          </div>
+          <div className="mt-4 text-center">
+            <Link
+              to="/login"
+              className="text-sm text-blue-600 hover:text-blue-500"
+            >
+              Already have an account?
+            </Link>
           </div>
         </form>
       </div>

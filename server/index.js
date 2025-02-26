@@ -7,6 +7,8 @@ import authPatientRouter from "./router/patient.router.js";
 import authResearcherRouter from "./router/researcher.router.js";
 import patientMedicalReportRouter from "./router/patient.medicalReport.router.js";
 import researcherMedicalReportRouter from "./router/researcher.medicalReport.router.js";
+import commentRouter from "./router/comment.router.js";
+import blogRouter from "./router/blog.router.js";
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ app.use("/api/auth", authPatientRouter);
 app.use("/api/main/auth", authResearcherRouter);
 app.use("/api/medical/patient", patientMedicalReportRouter);
 app.use("/api/medical/researcher", researcherMedicalReportRouter);
+app.use("/api/comment", commentRouter);
+app.use("/api/blog", blogRouter);
 
 mongoDBConnect();
 app.listen(process.env.PORT, () => {

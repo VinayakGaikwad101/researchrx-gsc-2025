@@ -15,10 +15,5 @@
       "src": "/(.*)",
       "dest": "/"
     }
-  ],
-  "scripts": [
-    {
-      "build": "npm run watch:css"
-    }
   ]
 }

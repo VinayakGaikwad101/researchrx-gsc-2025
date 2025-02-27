@@ -12,6 +12,8 @@ import VerifyEmail from "./components/VerifyEmail";
 import Profile from "./components/Profile";
 import MedicalReports from "./components/MedicalReports";
 import CreateBlog from "./components/CreateBlog";
+import BlogList from "./components/BlogList.jsx";
+import BlogDetail from "./components/BlogDetail";
 import { useAuthStore } from "./store/useAuthStore";
 import ForgotPassword from "./components/ForgotPassword";
 
@@ -36,6 +38,8 @@ const App = () => {
           path="/create-blog"
           element={authUser ? <CreateBlog /> : <Login />}
         />
+        <Route path="/blogs" element={<BlogList />} />
+        <Route path="/blogs/:blogId" element={<BlogDetail />} />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>
       <Toaster />

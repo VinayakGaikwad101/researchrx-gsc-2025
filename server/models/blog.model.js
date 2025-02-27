@@ -15,14 +15,16 @@ const blogSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    images: [String],
-    style: { type: String, default: "" },
     tags: {
       type: [String],
       required: true,
       minlength: 3,
       maxlength: 10,
       default: [],
+    },
+    template: {
+      type: String,
+      required: true,
     },
   },
   {

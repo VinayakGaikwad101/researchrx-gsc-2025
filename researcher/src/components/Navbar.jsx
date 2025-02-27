@@ -76,6 +76,12 @@ const Navbar = () => {
                   >
                     Reports
                   </Link>
+                  <Link
+                    to="/create-blog"
+                    className="text-white hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Blog
+                  </Link>
 
                   <button
                     onClick={handleLogout}
@@ -181,6 +187,15 @@ const Navbar = () => {
                       className="text-white hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                     >
                       Reports
+                    </Link>
+                  </motion.div>
+
+                  <motion.div variants={menuItemVariants}>
+                    <Link
+                      to="/create-blog"
+                      className="text-white hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                    >
+                      Blogs
                     </Link>
                   </motion.div>
 

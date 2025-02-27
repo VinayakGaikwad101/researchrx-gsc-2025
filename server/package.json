@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "watch:css": "postcss public/css/tailwind.css -o public/css/styles.css -w",
     "start": "node index",
     "dev": "nodemon index"
   },
@@ -25,9 +26,15 @@
     "mongoose": "^8.10.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.0",
-    "os": "^0.1.2"
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "url": "^0.11.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "autoprefixer": "^10.4.20",
+    "nodemon": "^3.1.9",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^10.1.0",
+    "tailwindcss": "^3.4.17"
   }
 }

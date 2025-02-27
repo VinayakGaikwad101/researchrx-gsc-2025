@@ -32,6 +32,7 @@ router.get("/getTemplates", protectRoute, (req, res) => {
           tags: ["sample", "blog", "template"],
         };
 
+        // render the html
         const renderedHtml = ejs.render(templateContent, sampleData);
 
         templates.push({

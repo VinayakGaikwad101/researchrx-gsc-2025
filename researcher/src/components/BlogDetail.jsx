@@ -1,35 +1,43 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import useBlogStore from "../store/useBlogStore";
 
 const BlogDetail = () => {
   const { blogId } = useParams();
-  const { selectedBlog, fetchBlogById } = useBlogStore();
+  const { fetchBlogById, selectedBlog, loading } = useBlogStore();
+  const [blogHtml, setBlogHtml] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchBlogById(blogId);
-  }, [blogId]);
+    const fetchBlog = async () => {
+      try {
+        const blogHtml = await fetchBlogById(blogId);
+        setBlogHtml(blogHtml);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+    fetchBlog();
+  }, [blogId, fetchBlogById]);
 
-  if (!selectedBlog) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">{selectedBlog.title}</h1>
-      <div
-        dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
-        className="text-gray-700"
-      />
-      <div className="mt-4">
-        {selectedBlog.tags.map((tag, index) => (
-          <span
-            key={index}
-            className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-medium mr-2"
-          >
-            {tag}
-          </span>
-        ))}
+  return selectedBlog && blogHtml ? (
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      <div className="bg-white p-6 shadow-md">
+        <div
+          className="flex-grow"
+          dangerouslySetInnerHTML={{ __html: selectedBlog.renderedHtml }}
+        />
+      </div>
+      <div className="bg-gray-100 p-6">
+        <h2 className="text-2xl font-bold mb-4">Comments</h2>
+        {/* Add your comment section implementation here */}
       </div>
     </div>
+  ) : (
+    <div>No blog data available</div>
   );
 };
 

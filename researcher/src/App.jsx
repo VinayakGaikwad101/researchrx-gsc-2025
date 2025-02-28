@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-
+import PeriodicTable from "./components/PeriodicTable.jsx";
 import ResetPassword from "./components/ResetPassword";
 import Home from "./components/Home";
 import ErrorPage from "./components/ErrorPage";
@@ -35,11 +35,18 @@ const App = () => {
           element={authUser ? <MedicalReports /> : <Login />}
         />
         <Route
+          path="/periodic-table"
+          element={authUser ? <PeriodicTable /> : <Login />}
+        />
+        <Route
           path="/create-blog"
           element={authUser ? <CreateBlog /> : <Login />}
         />
-        <Route path="/blogs" element={<BlogList />} />
-        <Route path="/blogs/:blogId" element={<BlogDetail />} />
+        <Route path="/blogs" element={authUser ? <BlogList /> : <Login />} />
+        <Route
+          path="/blogs/:blogId"
+          element={authUser ? <BlogDetail /> : <Login />}
+        />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>
       <Toaster />

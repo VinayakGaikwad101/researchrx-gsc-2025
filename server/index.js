@@ -11,6 +11,7 @@ import researcherMedicalReportRouter from "./router/researcher.medicalReport.rou
 import commentRouter from "./router/comment.router.js";
 import blogRouter from "./router/blog.router.js";
 import blogTemplateRouter from "./router/blog.template.router.js";
+import periodicTableRouter from "./router/periodicTable.router.js";
 
 dotenv.config();
 
@@ -39,7 +40,17 @@ app.use("/api/medical/researcher", researcherMedicalReportRouter);
 app.use("/api/comment", commentRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/templates/blog", blogTemplateRouter);
+app.use("/api/researcher", periodicTableRouter);
 
+app.get("/", (req, res) => {
+  try {
+    console.log("API health: working");
+    res.status(200).json({ message: "Server is running", success: true });
+  } catch (error) {
+    console.error("Error in API health check: ", error);
+    res.status(500).json({ message: "Server error", success: false });
+  }
+});
 mongoDBConnect();
 app.listen(process.env.PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PORT}`);

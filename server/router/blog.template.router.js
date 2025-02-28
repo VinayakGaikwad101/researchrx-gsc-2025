@@ -28,7 +28,7 @@ router.get("/getTemplates", protectRoute, (req, res) => {
         const sampleData = {
           title: "Sample Title",
           content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit cum incidunt in ratione commodi temporibus unde dolor, odio corporis amet minima obcaecati iure exercitationem nesciunt ex explicabo impedit, et saepe voluptatem aliquid? Dolore aliquam, repellendus consequuntur sequi laboriosam veniam debitis molestias soluta aspernatur veritatis quibusdam sit vero? Est veniam odio laborum ex asperiores inventore perspiciatis possimus aut. Omnis libero illum alias aspernatur provident, quod vel doloremque et obcaecati nostrum veritatis fuga neque unde veniam! Minima, architecto nam commodi ex odit ratione qui nemo voluptate quaerat, iusto aperiam laborum et illum repudiandae aliquid, temporibus rem voluptatibus neque provident cum enim nobis.",
+            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit cum incidunt in ratione commodi temporibus unde dolor, odio corporis amet minima obcaecati iure exercitationem nesciunt ex explicabo impedit.",
           tags: ["sample", "blog", "template"],
         };
 

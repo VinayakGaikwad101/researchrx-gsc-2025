@@ -1,5 +1,12 @@
 import Blog from "../models/blog.model.js";
 import mongoose from "mongoose";
+import path from "path";
+import { fileURLToPath } from "url";
+import ejs from "ejs";
+
+// Get __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Function to create a blog
 export const createBlog = async (req, res) => {
@@ -73,10 +80,32 @@ export const getAllBlogs = async (req, res) => {
       "author",
       "firstName lastName title"
     );
+
+    const renderedBlogs = await Promise.all(
+      blogs.map(async (blog) => {
+        const templatePath = path.join(
+          __dirname,
+          `../views/${blog.template}.ejs`
+        );
+        const renderedHtml = await ejs.renderFile(templatePath, {
+          title: blog.title,
+          content: blog.content,
+          tags: blog.tags,
+          author: blog.author,
+          createdAt: blog.createdAt,
+          updatedAt: blog.updatedAt,
+        });
+        return {
+          ...blog.toObject(),
+          renderedHtml,
+        };
+      })
+    );
+
     res.status(200).json({
       success: true,
       message: "Blogs fetched successfully",
-      blogs,
+      blogs: renderedBlogs,
     });
   } catch (error) {
     console.error("Error fetching blogs:", error);
@@ -103,11 +132,18 @@ export const getBlogById = async (req, res) => {
         message: "Blog not found",
       });
     }
-    res.status(200).json({
-      success: true,
-      message: "Blog fetched successfully",
-      blog,
+
+    const templatePath = path.join(__dirname, `../views/${blog.template}.ejs`);
+    const renderedHtml = await ejs.renderFile(templatePath, {
+      title: blog.title,
+      content: blog.content,
+      tags: blog.tags,
+      author: blog.author,
+      createdAt: blog.createdAt,
+      updatedAt: blog.updatedAt,
     });
+
+    res.status(200).send(renderedHtml);
   } catch (error) {
     console.error("Error fetching blog:", error);
     res.status(500).json({

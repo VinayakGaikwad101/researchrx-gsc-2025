@@ -1,5 +1,5 @@
 // middlewares/authMiddleware.js
-export const requireResearcher = (req, res, next) => {
+const protectRoleSpecificRoute = (req, res, next) => {
   if (req.user && req.user.role === "Researcher") {
     next();
   } else {
@@ -8,3 +8,5 @@ export const requireResearcher = (req, res, next) => {
       .json({ message: "Access denied. Researchers only.", success: false });
   }
 };
+
+export default protectRoleSpecificRoute;

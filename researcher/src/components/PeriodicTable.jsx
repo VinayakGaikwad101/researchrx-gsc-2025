@@ -112,18 +112,20 @@ const PeriodicTable = () => {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold mb-4">Periodic Table</h1>
-      <div className="grid gap-1">
-        {grid.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex gap-1">
-            {row.map((element, colIndex) =>
-              element ? (
-                renderElement(element)
-              ) : (
-                <div key={colIndex} className="w-16 h-16" />
-              )
-            )}
-          </div>
-        ))}
+      <div className="overflow-auto">
+        <div className="grid gap-1" style={{ minWidth: "900px" }}>
+          {grid.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex gap-1">
+              {row.map((element, colIndex) =>
+                element ? (
+                  renderElement(element)
+                ) : (
+                  <div key={colIndex} className="w-16 h-16" />
+                )
+              )}
+            </div>
+          ))}
+        </div>
       </div>
       <Modal
         isOpen={!!selectedElement}

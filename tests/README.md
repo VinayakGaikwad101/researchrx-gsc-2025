@@ -171,5 +171,8 @@ Coverage reports will be available in the `coverage` directory.
 ## 📞 Support
 For support, contact vinaayakgaikwad@gmail.com
 
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+
 ---
 Part of ResearchRX - Google Solutions Challenge 2025

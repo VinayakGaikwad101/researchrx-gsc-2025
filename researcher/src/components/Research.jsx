@@ -27,22 +27,9 @@ const Research = () => {
 
   useEffect(() => {
     if (searchQuery) {
-      fetchResults(
-        searchQuery,
-        currentPage,
-        searchMaxResults,
-        searchPatents,
-        searchCitations
-      );
       fetchSuggestions(searchQuery);
     }
-  }, [
-    searchQuery,
-    currentPage,
-    searchMaxResults,
-    searchPatents,
-    searchCitations,
-  ]);
+  }, [searchQuery]);
 
   const handlePageChange = async (newPage) => {
     try {
@@ -153,7 +140,6 @@ const Research = () => {
     <div style={styles.container}>
       <h1>Research Results</h1>
       <div style={styles.searchBar}>
-        <Search className="search-icon" />
         <input
           type="text"
           value={searchQuery}
@@ -173,7 +159,10 @@ const Research = () => {
             {suggestions.slice(0, 5).map((suggestion, index) => (
               <li
                 key={index}
-                onClick={() => setSearchQuery(suggestion)}
+                onClick={() => {
+                  setSearchQuery(suggestion);
+                  setShowSuggestions(false);
+                }}
                 style={styles.suggestionItem}
               >
                 {suggestion}

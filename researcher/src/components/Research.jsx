@@ -1,184 +1,100 @@
-import React, { useState, useEffect } from "react";
-import { useGoogleScholarStore } from "../store/useGoogleScholarStore";
+import React, { useState } from "react";
 import { Search, Loader, X } from "lucide-react"; // Importing icons from Lucide React
 
 const Research = () => {
-  const {
-    results,
-    totalResults,
-    currentPage,
-    pageSize,
-    fetchResults,
-    fetchSuggestions,
-    query,
-    maxResults,
-    patents,
-    citations,
-    suggestions,
-    isLoading,
-  } = useGoogleScholarStore();
-
-  const [searchQuery, setSearchQuery] = useState(query);
-  const [searchMaxResults, setSearchMaxResults] = useState(maxResults);
-  const [searchPatents, setSearchPatents] = useState(patents);
-  const [searchCitations, setSearchCitations] = useState(citations);
-  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [results, setResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
-  useEffect(() => {
-    if (searchQuery) {
-      fetchSuggestions(searchQuery);
-    }
-  }, [searchQuery]);
-
-  const handlePageChange = async (newPage) => {
+  const fetchResults = async (query) => {
+    setIsLoading(true);
     try {
-      await fetchResults(
-        searchQuery,
-        newPage,
-        searchMaxResults,
-        searchPatents,
-        searchCitations
+      const response = await fetch(
+        `https://openlibrary.org/search.json?q=${query}`
       );
-      setError(null); // Reset error state on successful fetch
-    } catch (err) {
-      setError("An error occurred while fetching results.");
+      const data = await response.json();
+      console.log("Fetched Data:", data); // Console log the fetched data
+      setResults(data.docs || []);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching results:", error);
+      setError("Error fetching results");
+      setIsLoading(false);
     }
   };
 
   const handleSearch = () => {
-    fetchResults(
-      searchQuery,
-      1,
-      searchMaxResults,
-      searchPatents,
-      searchCitations
-    );
-    setShowSuggestions(false);
+    setCurrentPage(1); // Reset to first page on new search
+    fetchResults(searchQuery);
   };
 
   const handleInputChange = (e) => {
     setSearchQuery(e.target.value);
-    setShowSuggestions(true);
-    fetchSuggestions(e.target.value);
   };
 
-  const styles = {
-    container: {
-      maxWidth: "800px",
-      margin: "0 auto",
-      padding: "20px",
-      fontFamily: "Arial, sans-serif",
-    },
-    searchBar: {
-      display: "flex",
-      alignItems: "center",
-      marginBottom: "20px",
-      position: "relative",
-    },
-    searchInput: {
-      flexGrow: 1,
-      padding: "8px",
-      marginRight: "8px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-    },
-    clearButton: {
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: 0,
-    },
-    loadingIcon: {
-      marginLeft: "8px",
-      animation: "spin 1s linear infinite",
-    },
-    searchButton: {
-      display: "flex",
-      alignItems: "center",
-      padding: "8px 12px",
-      backgroundColor: "#007bff",
-      border: "none",
-      color: "white",
-      borderRadius: "4px",
-      cursor: "pointer",
-    },
-    suggestionsList: {
-      position: "absolute",
-      top: "40px",
-      left: 0,
-      right: 0,
-      zIndex: 1,
-      marginTop: "8px",
-      padding: "8px",
-      border: "1px solid #ccc",
-      borderRadius: "4px",
-      backgroundColor: "white",
-      listStyleType: "none",
-      boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-    },
-    suggestionItem: {
-      padding: "8px",
-      cursor: "pointer",
-    },
-    resultsList: {
-      listStyleType: "none",
-      padding: 0,
-    },
-    resultItem: {
-      marginBottom: "20px",
-    },
-    pagination: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: "20px",
-    },
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
+
+  const totalPages = Math.ceil(results.length / pageSize);
+  const paginatedResults = results.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
-    <div style={styles.container}>
-      <h1>Research Results</h1>
-      <div style={styles.searchBar}>
+    <div className="max-w-2xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        Research Results
+      </h1>
+      <div className="flex items-center mb-6 relative">
         <input
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
           placeholder="Search Query"
-          style={styles.searchInput}
+          className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
         />
-        <button onClick={() => setSearchQuery("")} style={styles.clearButton}>
+        <button
+          onClick={() => setSearchQuery("")}
+          className="ml-2 text-gray-500 focus:outline-none"
+        >
           <X className="clear-icon" />
         </button>
-        {isLoading && <Loader style={styles.loadingIcon} />}
-        <button onClick={handleSearch} style={styles.searchButton}>
-          <Search className="button-icon" /> Search
+        {isLoading && <Loader className="ml-2 animate-spin text-gray-500" />}
+        <button
+          onClick={handleSearch}
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none transition duration-300"
+        >
+          <Search className="mr-2" /> Search
         </button>
-        {showSuggestions && suggestions.length > 0 && (
-          <ul style={styles.suggestionsList}>
-            {suggestions.slice(0, 5).map((suggestion, index) => (
-              <li
-                key={index}
-                onClick={() => {
-                  setSearchQuery(suggestion);
-                  setShowSuggestions(false);
-                }}
-                style={styles.suggestionItem}
-              >
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
-      {error && <p>{error}</p>}
-      <ul style={styles.resultsList}>
-        {results && results.length > 0 ? (
-          results.map((result, index) => (
-            <li key={index} style={styles.resultItem}>
-              <h3>{result.title}</h3>
-              <p>{result.abstract}</p>
-              <a href={result.url} target="_blank" rel="noopener noreferrer">
+      {error && <p className="text-red-500">{error}</p>}
+      <ul className="space-y-4">
+        {paginatedResults && paginatedResults.length > 0 ? (
+          paginatedResults.map((result, index) => (
+            <li
+              key={index}
+              className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+            >
+              <h3 className="text-lg font-semibold text-blue-500">
+                {result.title}
+              </h3>
+              <p className="text-gray-700">
+                {result.author_name
+                  ? result.author_name.join(", ")
+                  : "Unknown Author"}
+              </p>
+              <p className="text-gray-600">{result.first_publish_year}</p>
+              <a
+                href={`https://openlibrary.org${result.key}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
                 Read more
               </a>
             </li>
@@ -187,21 +103,35 @@ const Research = () => {
           <p>No results found.</p>
         )}
       </ul>
-      <div style={styles.pagination}>
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>Page {currentPage}</span>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage * pageSize >= totalResults}
-        >
-          Next
-        </button>
-      </div>
+      {results.length > pageSize && (
+        <div className="flex justify-between items-center mt-6">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition duration-300"
+            }`}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                : "bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition duration-300"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

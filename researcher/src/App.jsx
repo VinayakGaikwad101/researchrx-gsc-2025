@@ -16,6 +16,7 @@ import BlogList from "./components/BlogList.jsx";
 import BlogDetail from "./components/BlogDetail";
 import { useAuthStore } from "./store/useAuthStore";
 import ForgotPassword from "./components/ForgotPassword";
+import Research from "./components/Research.jsx";
 
 const App = () => {
   const { authUser } = useAuthStore();
@@ -38,6 +39,7 @@ const App = () => {
           path="/periodic-table"
           element={authUser ? <PeriodicTable /> : <Login />}
         />
+        <Route path="/research" element={authUser ? <Research /> : <Login />} />
         <Route
           path="/create-blog"
           element={authUser ? <CreateBlog /> : <Login />}

@@ -1,6 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Trash, Edit, Eye } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trash, Edit, Eye, Upload } from "lucide-react";
 import useMedicalReportStore from "../store/useMedicalReportStore";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Modal } from "./ui/modal";
 
 const MedicalReports = () => {
   const {
@@ -13,41 +20,37 @@ const MedicalReports = () => {
     error,
   } = useMedicalReportStore();
 
-  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [newReportName, setNewReportName] = useState("");
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
-  const [selectedPdf, setSelectedPdf] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchMedicalReports();
   }, [fetchMedicalReports]);
 
-  const handleRename = async () => {
-    if (selectedReport && newReportName) {
-      await renameMedicalReport(selectedReport._id, newReportName);
-      setIsRenameModalOpen(false);
-      setNewReportName("");
-    }
+  const handleRename = async (id, newName) => {
+    await renameMedicalReport(id, newName);
+    setNewReportName("");
   };
 
   const handleDelete = async (id) => {
     await deleteMedicalReport(id);
-    setIsRenameModalOpen(false);
     setUploadFile(null);
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file.type !== "application/pdf") {
+    if (file && file.type !== "application/pdf") {
       setUploadError("Only PDF files are allowed.");
       return;
     }
     setUploadError("");
     setUploadFile(file);
+    setNewReportName(file?.name || "");
   };
 
   const handleUpload = async () => {
@@ -69,141 +72,201 @@ const MedicalReports = () => {
     }
   };
 
-  const handleView = (pdfUrl) => {
-    console.log("PDF URL:", pdfUrl); // Debugging line
-    setSelectedPdf(pdfUrl);
+  const handleView = (url) => {
+    setSelectedPdfUrl(url);
     setIsViewModalOpen(true);
   };
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        when: "beforeChildren",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
   return (
-    <div className="container mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Medical Reports</h1>
-      <div className="mt-4">
-        <input
-          type="file"
-          onChange={handleFileChange}
-          ref={fileInputRef}
-          className="block w-full text-sm text-gray-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-full file:border-0
-            file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100"
-        />
-        <input
-          type="text"
-          value={newReportName}
-          onChange={(e) => setNewReportName(e.target.value)}
-          placeholder="New report name"
-          className="mt-2 block w-full p-2 border rounded"
-        />
-        {uploadError && <p className="text-red-500">{uploadError}</p>}
-        <button
-          onClick={handleUpload}
-          className={`mt-2 p-2 ${
-            isLoading ? "bg-gray-500" : "bg-blue-500"
-          } text-white rounded`}
-          disabled={isLoading}
-        >
-          {isLoading ? "Uploading..." : "Upload Report"}
-        </button>
-      </div>
-      {isLoading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-        {medicalReports.map((report) => (
-          <div
-            key={report._id}
-            className="border p-4 rounded-lg flex items-center justify-between"
-          >
-            <div>
-              <h2 className="text-xl font-semibold">{report.name}</h2>
-              <p>{report.description}</p>
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleView(report.url)}
-                className="p-2 bg-green-500 text-white rounded flex items-center"
-              >
-                <Eye className="m-1" />
-                View
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedReport(report);
-                  setNewReportName(report.name);
-                  setIsRenameModalOpen(true);
-                }}
-                className="p-2 bg-blue-500 text-white rounded flex items-center"
-              >
-                <Edit className="m-1" />
-                Rename
-              </button>
-              <button
-                onClick={() => handleDelete(report._id)}
-                className="p-2 bg-red-500 text-white rounded flex items-center"
-              >
-                <Trash className="m-1" />
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        className="max-w-6xl mx-auto"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <Card>
+          <CardHeader>
+            <motion.div variants={itemVariants}>
+              <CardTitle className="text-3xl font-bold">Medical Reports</CardTitle>
+              <CardDescription>
+                Upload and manage your medical reports securely
+              </CardDescription>
+            </motion.div>
+          </CardHeader>
+          <CardContent>
+            <motion.div variants={itemVariants} className="space-y-6">
+              {/* Upload Section */}
+              <Card className="bg-muted/50">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <Input
+                          type="file"
+                          onChange={handleFileChange}
+                          ref={fileInputRef}
+                          accept=".pdf"
+                          className="cursor-pointer"
+                        />
+                      </div>
+                      <Button
+                        onClick={handleUpload}
+                        disabled={isLoading || !uploadFile}
+                      >
+                        {isLoading ? (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center gap-2"
+                          >
+                            <span className="inline-block h-4 w-4 border-2 border-current border-r-transparent rounded-full animate-spin" />
+                            <span>Uploading...</span>
+                          </motion.div>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload Report
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    {uploadFile && (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="text"
+                          value={newReportName}
+                          onChange={(e) => setNewReportName(e.target.value)}
+                          placeholder="Report name"
+                        />
+                      </div>
+                    )}
+                    {uploadError && (
+                      <Alert variant="destructive">
+                        <AlertDescription>{uploadError}</AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
 
-      {isViewModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg">
-            <div
-              className="w-full h-full overflow-auto"
-              style={{ maxHeight: "80vh" }}
-            >
-              {selectedPdf ? (
-                <iframe
-                  src={selectedPdf}
-                  title="PDF Viewer"
-                  width="1000px"
-                  height="800px"
-                ></iframe>
-              ) : (
-                <p>No PDF file specified.</p>
-              )}
-            </div>
-            <button
-              onClick={() => setIsViewModalOpen(false)}
-              className="mt-4 p-2 bg-gray-500 text-white rounded"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+              {/* Reports Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <AnimatePresence>
+                  {medicalReports.map((report) => (
+                    <motion.div
+                      key={report._id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <Card className="hover:bg-muted/50 transition-colors">
+                        <CardContent className="pt-6">
+                          <div className="flex flex-col space-y-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="font-semibold">{report.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(report.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleView(report.url)}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedReport(report);
+                                    setNewReportName(report.name);
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDelete(report._id)}
+                                >
+                                  <Trash className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            {selectedReport?._id === report._id && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="flex items-center gap-2"
+                              >
+                                <Input
+                                  value={newReportName}
+                                  onChange={(e) => setNewReportName(e.target.value)}
+                                  placeholder="New name"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    handleRename(report._id, newReportName);
+                                    setSelectedReport(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                              </motion.div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      {isRenameModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4">Rename Report</h2>
-            <input
-              type="text"
-              value={newReportName}
-              onChange={(e) => setNewReportName(e.target.value)}
-              placeholder="New report name"
-              className="block w-full p-2 border rounded mb-4"
-            />
-            <button
-              onClick={handleRename}
-              className="p-2 bg-blue-500 text-white rounded"
-            >
-              Rename
-            </button>
-            <button
-              onClick={() => setIsRenameModalOpen(false)}
-              className="mt-4 p-2 bg-gray-500 text-white rounded"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* PDF Viewer Modal */}
+      <Modal 
+        isOpen={isViewModalOpen} 
+        onClose={() => setIsViewModalOpen(false)}
+      >
+        {selectedPdfUrl && (
+          <iframe
+            src={selectedPdfUrl}
+            title="PDF Viewer"
+            className="w-full h-full rounded-lg"
+          />
+        )}
+      </Modal>
     </div>
   );
 };

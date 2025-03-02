@@ -1,41 +1,43 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/useAuthStore";
-import PacmanLoader from "react-spinners/PacmanLoader";
+import { Menu, X } from "lucide-react";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { authUser, logout, checkingAuth } = useAuthStore();
 
   useEffect(() => {
-    // Check authentication status when component mounts
     useAuthStore.getState().checkAuth();
   }, []);
-
-  const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleLogout = async () => {
     const success = await logout();
     if (success) {
       navigate("/");
+      setIsOpen(false);
     }
   };
 
   const menuVariants = {
     closed: {
       opacity: 0,
-      y: -20,
+      height: 0,
       transition: {
+        duration: 0.3,
         staggerChildren: 0.05,
         staggerDirection: -1,
       },
     },
     open: {
       opacity: 1,
-      y: 0,
+      height: "auto",
       transition: {
+        duration: 0.3,
         staggerChildren: 0.07,
         delayChildren: 0.2,
       },
@@ -43,245 +45,155 @@ const Navbar = () => {
   };
 
   const menuItemVariants = {
-    closed: { opacity: 0, y: -20 },
-    open: { opacity: 1, y: 0 },
+    closed: { opacity: 0, x: -16 },
+    open: { opacity: 1, x: 0 },
   };
 
-  // loader
+  const NavLink = ({ to, children, className = "", onClick }) => {
+    const isActive = location.pathname === to;
+    return (
+      <Link
+        to={to}
+        className={`${
+          isActive
+            ? "bg-white/10 text-white"
+            : "text-gray-300 hover:text-white hover:bg-white/10"
+        } px-3 py-2 rounded-md text-sm font-medium transition-colors ${className}`}
+        onClick={onClick}
+      >
+        {children}
+      </Link>
+    );
+  };
+
   if (checkingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <PacmanLoader size={50} color={"#36D7B7"} />
+      <div className="flex items-center justify-center h-16 bg-black border-b border-white/10">
+        <div className="h-4 w-4 border-2 border-white border-r-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
+  const menuItems = authUser
+    ? [
+        { to: "/profile", label: "Profile" },
+        { to: "/medical-reports", label: "Reports" },
+        { to: "/bmi", label: "BMI" },
+        { to: "/self-diagnose", label: "Diagnose" },
+      ]
+    : [
+        { to: "/", label: "Home" },
+        { to: "/about", label: "About" },
+        { to: "/contact", label: "Contact" },
+      ];
+
   return (
-    <nav className="bg-blue-600 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0"></Link>
+    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-black">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            {menuItems.map((item) => (
+              <NavLink key={item.to} to={item.to}>
+                {item.label}
+              </NavLink>
+            ))}
           </div>
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
-              {authUser ? (
-                <>
-                  <Link
-                    to="/profile"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/medical-reports"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Reports
-                  </Link>
-                  <Link
-                    to="/bmi"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    BMI
-                  </Link>
-                  <Link
-                    to="/self-diagnose"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Diagnose
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    to="/about"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    About
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Contact
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="text-white hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            {authUser ? (
+              <Button
+                variant="ghost"
+                onClick={handleLogout}
+                className="text-gray-300 hover:text-white hover:bg-white/10"
+              >
+                Logout
+              </Button>
+            ) : (
+              <>
+                <NavLink to="/login">Login</NavLink>
+                <NavLink to="/signup">Sign Up</NavLink>
+              </>
+            )}
           </div>
-          <div className="-mr-2 flex md:hidden">
-            <button
-              onClick={toggleMenu}
-              type="button"
-              className="bg-blue-600 inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white"
-              aria-controls="mobile-menu"
-              aria-expanded="false"
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-300 hover:text-white"
             >
-              <span className="sr-only">Open main menu</span>
-              {!isOpen ? (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
+              {isOpen ? (
+                <X className="h-5 w-5" />
               ) : (
-                <svg
-                  className="block h-6 w-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <Menu className="h-5 w-5" />
               )}
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="md:hidden"
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={menuVariants}
-          >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {authUser ? (
-                <>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/profile"
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={menuVariants}
+              className="md:hidden overflow-hidden bg-black/95 backdrop-blur"
+            >
+              <div className="space-y-1 pb-3">
+                {menuItems.map((item) => (
+                  <motion.div key={item.to} variants={menuItemVariants}>
+                    <NavLink
+                      to={item.to}
+                      className="block"
+                      onClick={() => setIsOpen(false)}
                     >
-                      Profile
-                    </Link>
+                      {item.label}
+                    </NavLink>
                   </motion.div>
+                ))}
+                {authUser ? (
                   <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/medical-reports"
-                      className="text-white hover:bg-blue-50  hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      Reports
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/bmi"
-                      className="text-white hover:bg-blue-50  hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      BMI
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/self-diagnose"
-                      className="text-white hover:bg-blue-50  hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      Diagnose
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={handleLogout}
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                      className="w-full text-left text-gray-300 hover:text-white hover:bg-white/10"
                     >
                       Logout
-                    </button>
+                    </Button>
                   </motion.div>
-                </>
-              ) : (
-                <>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/"
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      Home
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/about"
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      About
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/contact"
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      Contact
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/login"
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      Login
-                    </Link>
-                  </motion.div>
-                  <motion.div variants={menuItemVariants}>
-                    <Link
-                      to="/signup"
-                      className="text-white hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
-                    >
-                      Sign Up
-                    </Link>
-                  </motion.div>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                ) : (
+                  <>
+                    <motion.div variants={menuItemVariants}>
+                      <NavLink
+                        to="/login"
+                        className="block"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Login
+                      </NavLink>
+                    </motion.div>
+                    <motion.div variants={menuItemVariants}>
+                      <NavLink
+                        to="/signup"
+                        className="block"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Sign Up
+                      </NavLink>
+                    </motion.div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </nav>
   );
 };

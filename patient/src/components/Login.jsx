@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import { motion } from "framer-motion";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Label } from "./ui/label";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,82 +18,158 @@ const Login = () => {
     await login({ email, password }, navigate);
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        when: "beforeChildren",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const linkVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    hover: { 
+      scale: 1.02,
+      color: "hsl(var(--primary))",
+      transition: { duration: 0.2 }
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white shadow-xl rounded-lg p-8">
-        <h2 className="text-3xl font-bold text-blue-600 mb-6 text-center">
-          Login to Your Account
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={loading}
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </div>
-        </form>
-        <div className="mt-4 text-center">
-          <Link
-            to="/signup"
-            className="text-sm text-blue-600 hover:text-blue-500"
-          >
-            Don't have an account?
-          </Link>
-        </div>
-        <div className="mt-4 text-center">
-          <Link
-            to="/forgot-password"
-            className="text-sm text-blue-600 hover:text-blue-500"
-          >
-            Forgot your password?
-          </Link>
-        </div>
-        <div className="mt-4 text-center">
-          <Link
-            to="/otp-verification"
-            className="text-sm text-blue-600 hover:text-blue-500"
-          >
-            Email not verified?
-          </Link>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        className="max-w-md w-full"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <Card className="w-full">
+          <CardHeader>
+            <motion.div variants={itemVariants}>
+              <CardTitle className="text-3xl font-bold text-center">
+                Welcome Back
+              </CardTitle>
+              <CardDescription className="text-center mt-2">
+                Enter your credentials to access your account
+              </CardDescription>
+            </motion.div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <motion.div variants={itemVariants}>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="Enter your email"
+                />
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="Enter your password"
+                />
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                  variant="default"
+                >
+                  {loading ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center space-x-2"
+                    >
+                      <span className="inline-block h-4 w-4 border-2 border-current border-r-transparent rounded-full animate-spin" />
+                      <span>Logging in...</span>
+                    </motion.div>
+                  ) : (
+                    "Login"
+                  )}
+                </Button>
+              </motion.div>
+            </form>
+
+            <div className="mt-6 space-y-2">
+              <motion.div 
+                className="text-center"
+                variants={itemVariants}
+              >
+                <motion.div
+                  variants={linkVariants}
+                  whileHover="hover"
+                >
+                  <Link to="/signup" className="text-sm text-muted-foreground hover:text-primary">
+                    Don't have an account?
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.div 
+                className="text-center"
+                variants={itemVariants}
+              >
+                <motion.div
+                  variants={linkVariants}
+                  whileHover="hover"
+                >
+                  <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
+                    Forgot your password?
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.div 
+                className="text-center"
+                variants={itemVariants}
+              >
+                <motion.div
+                  variants={linkVariants}
+                  whileHover="hover"
+                >
+                  <Link to="/otp-verification" className="text-sm text-muted-foreground hover:text-primary">
+                    Email not verified?
+                  </Link>
+                </motion.div>
+              </motion.div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

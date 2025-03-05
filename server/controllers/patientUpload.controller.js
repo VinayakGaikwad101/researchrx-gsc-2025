@@ -2,6 +2,9 @@ import cloudinary from "../config/cloudinary.config.js";
 import upload from "../config/multer.config.js";
 import fs from "fs";
 import MedicalReport from "../models/medicalReport.model.js";
+import pdfParse from "pdf-parse-new";
+import { model } from "../config/groqMixtral.config.js";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
 // Upload Medical Report
 export const uploadMedicalReport = (req, res) => {
@@ -48,6 +51,46 @@ export const uploadMedicalReport = (req, res) => {
     }
 
     try {
+      // Read the PDF file
+      const dataBuffer = fs.readFileSync(req.file.path);
+      
+      // Parse PDF and extract text
+      let pdfText = "";
+      try {
+        const data = await pdfParse(dataBuffer);
+        pdfText = data.text.trim();
+        
+        // If text extraction failed or no text was found, set a default message
+        if (!pdfText) {
+          pdfText = "No readable text found in PDF";
+        }
+      } catch (pdfError) {
+        console.error("Error parsing PDF: ", pdfError);
+        pdfText = "Error extracting text from PDF";
+      }
+
+      // Generate summary using Groq if text was successfully extracted
+      let finalDescription = description;
+      if (!description && pdfText && pdfText !== "No readable text found in PDF" && pdfText !== "Error extracting text from PDF") {
+        try {
+          console.log("Generating summary using Groq...");
+          const messages = [
+            new SystemMessage("Summarize the following medical report text concisely"),
+            new HumanMessage(pdfText),
+          ];
+          
+          const response = await model.invoke(messages);
+          const summary = response.content ? response.content : "Summary not available";
+          finalDescription = summary.slice(0, 500); // Ensure it fits in the database field
+          console.log("Summary generated successfully");
+        } catch (summaryError) {
+          console.error("Error generating summary:", summaryError);
+          finalDescription = pdfText.slice(0, 500); // Fallback to extracted text if summarization fails
+        }
+      } else if (!description) {
+        finalDescription = pdfText.slice(0, 500);
+      }
+
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: "medical_reports",
       });
@@ -60,7 +103,7 @@ export const uploadMedicalReport = (req, res) => {
 
       const newMedicalReport = new MedicalReport({
         name,
-        description,
+        description: finalDescription,
         url: result.secure_url,
         user: req.user._id,
       });

@@ -191,6 +191,17 @@ const MedicalReports = () => {
                                 <p className="text-sm text-muted-foreground">
                                   {new Date(report.createdAt).toLocaleDateString()}
                                 </p>
+                                <div 
+                                  className="relative group"
+                                  title={report.description || "No description available"}
+                                >
+                                  <p className="text-sm mt-2 text-muted-foreground line-clamp-3">
+                                    {report.description || "No description available"}
+                                  </p>
+                                  <div className="absolute z-50 invisible group-hover:visible bg-popover text-popover-foreground p-4 rounded-md shadow-md w-80 mt-2 left-0">
+                                    {report.description || "No description available"}
+                                  </div>
+                                </div>
                               </div>
                               <div className="flex gap-2">
                                 <Button

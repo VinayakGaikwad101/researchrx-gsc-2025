@@ -75,7 +75,17 @@ const MedicalReports = () => {
       onDragEnd={handleDragEnd}
     >
       <p className="font-semibold">{report.name}</p>
-      <p className="text-sm text-gray-600">{report.description}</p>
+      <div 
+        className="relative group"
+        title={report.description || "No description available"}
+      >
+        <p className="text-sm text-gray-600 line-clamp-3">
+          {report.description || "No description available"}
+        </p>
+        <div className="absolute z-50 invisible group-hover:visible bg-white text-gray-800 p-4 rounded-md shadow-md w-80 mt-2 left-0">
+          {report.description || "No description available"}
+        </div>
+      </div>
       <div className="flex gap-2 mt-2">
         <button
           className="p-2 bg-blue-500 text-white flex items-center rounded"

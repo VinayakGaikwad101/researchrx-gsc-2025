@@ -28,10 +28,21 @@ app.set('io', io);
 
 app.use(
   cors({
-    origin: [
-      process.env.PATIENT_FRONTEND_URL,
-      process.env.RESEARCHER_FRONTEND_URL,
-    ],
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        process.env.PATIENT_FRONTEND_URL,
+        process.env.RESEARCHER_FRONTEND_URL,
+      ];
+      
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })

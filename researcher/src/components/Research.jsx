@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Search, Loader, X } from "lucide-react";
 import DrugSearch from "./DrugSearch";
 import MoleculeViewer from "./MoleculeViewer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 const ResearchPapers = () => {
   const [results, setResults] = useState([]);
@@ -139,7 +139,7 @@ const Research = () => {
     <div className="container mx-auto p-4">
       <Tabs defaultValue="drugs" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="drugs">Drug Search</TabsTrigger>
+          <TabsTrigger value="drugs">Drug Database</TabsTrigger>
           <TabsTrigger value="papers">Research Papers</TabsTrigger>
           <TabsTrigger value="molecule">Molecule Viewer</TabsTrigger>
         </TabsList>

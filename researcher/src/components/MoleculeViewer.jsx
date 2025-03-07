@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React, { useState, useEffect } from "react";
+import { Card } from "./ui/card";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
 
 const commonMolecules = [
   {
@@ -49,14 +49,13 @@ const MoleculeViewer = () => {
   const [error, setError] = useState(null);
   const [selectedMolecule, setSelectedMolecule] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const fetchMoleculeStructure = async (smilesInput) => {
     setLoading(true);
     setError(null);
     try {
       // First, convert SMILES to PubChem CID
       const searchUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/${encodeURIComponent(
-        smiles
+        smilesInput
       )}/cids/JSON`;
       const response = await fetch(searchUrl);
       const data = await response.json();
@@ -78,11 +77,26 @@ const MoleculeViewer = () => {
     }
   };
 
-  const handleExampleClick = (molecule) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetchMoleculeStructure(smiles);
+  };
+
+  const handleExampleClick = async (molecule) => {
     setSmiles(molecule.smiles);
     setSelectedMolecule(molecule);
-    handleSubmit({ preventDefault: () => {} });
+    await fetchMoleculeStructure(molecule.smiles);
   };
+
+  // Initial load of the first molecule
+  useEffect(() => {
+    if (commonMolecules.length > 0) {
+      const firstMolecule = commonMolecules[0];
+      setSmiles(firstMolecule.smiles);
+      setSelectedMolecule(firstMolecule);
+      fetchMoleculeStructure(firstMolecule.smiles);
+    }
+  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

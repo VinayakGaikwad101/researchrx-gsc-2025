@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import toast from "react-hot-toast";
+import useChatStore from "./useChatStore";
 
 export const useAuthStore = create((set) => ({
   authUser: null,
@@ -188,6 +189,9 @@ export const useAuthStore = create((set) => ({
         toast.success("Logout successful");
         set({ authUser: null });
         localStorage.removeItem("authToken");
+        // Clean up chat store on logout
+        const chatStore = useChatStore.getState();
+        chatStore.cleanup();
         return true;
       } else {
         throw new Error("Logout failed");

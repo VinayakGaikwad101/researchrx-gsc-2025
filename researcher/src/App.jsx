@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import PeriodicTable from "./components/PeriodicTable.jsx";
@@ -17,9 +17,17 @@ import BlogDetail from "./components/BlogDetail";
 import { useAuthStore } from "./store/useAuthStore";
 import ForgotPassword from "./components/ForgotPassword";
 import Research from "./components/Research.jsx";
+import Chat from "./components/Chat/Chat.jsx";
+import UserList from "./components/Chat/UserList.jsx";
+import CreateGroup from "./components/Chat/CreateGroup.jsx";
+import GroupInfo from "./components/Chat/GroupInfo.jsx";
 
 const App = () => {
-  const { authUser } = useAuthStore();
+  const { authUser, checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
   return (
     <Router>
       <Navbar />
@@ -49,6 +57,10 @@ const App = () => {
           path="/blogs/:blogId"
           element={authUser ? <BlogDetail /> : <Login />}
         />
+        <Route path="/chat" element={authUser ? <Chat /> : <Login />} />
+        <Route path="/chat/new" element={authUser ? <UserList /> : <Login />} />
+        <Route path="/chat/group/new" element={authUser ? <CreateGroup /> : <Login />} />
+        <Route path="/chat/group/:groupId/info" element={authUser ? <GroupInfo /> : <Login />} />
         <Route path="/*" element={<ErrorPage />} />
       </Routes>
       <Toaster />

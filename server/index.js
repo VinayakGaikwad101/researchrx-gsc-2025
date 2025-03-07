@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 import mongoDBConnect from "./database/mongoose.database.js";
 import cors from "cors";
 import path from "path";
+import { createServer } from "http";
 import cookieParser from "cookie-parser";
+import { initializeSocket } from "./config/socket.config.js";
 import authPatientRouter from "./router/patient.router.js";
 import authResearcherRouter from "./router/researcher.router.js";
 import patientMedicalReportRouter from "./router/patient.medicalReport.router.js";
@@ -12,10 +14,17 @@ import commentRouter from "./router/comment.router.js";
 import blogRouter from "./router/blog.router.js";
 import blogTemplateRouter from "./router/blog.template.router.js";
 import periodicTableRouter from "./router/periodicTable.router.js";
+import chatRouter from "./router/chat.router.js";
 
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
+const io = initializeSocket(server);
+
+// Make io accessible in routes
+app.set('io', io);
+
 app.use(
   cors({
     origin: [
@@ -41,6 +50,7 @@ app.use("/api/comment", commentRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/templates/blog", blogTemplateRouter);
 app.use("/api/researcher", periodicTableRouter);
+app.use("/api/chat", chatRouter);
 
 app.get("/", (req, res) => {
   try {
@@ -51,7 +61,9 @@ app.get("/", (req, res) => {
     res.status(500).json({ message: "Server error", success: false });
   }
 });
+
 mongoDBConnect();
-app.listen(process.env.PORT, () => {
+
+server.listen(process.env.PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PORT}`);
 });

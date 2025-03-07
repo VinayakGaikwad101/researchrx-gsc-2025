@@ -88,12 +88,18 @@ const Navbar = () => {
                   >
                     Periodic Table
                   </Link>
-                  <Link
-                    to="/research"
-                    className="text-white hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Research
-                  </Link>
+                    <Link
+                      to="/research"
+                      className="text-white hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Research
+                    </Link>
+                    <Link
+                      to="/chat"
+                      className="text-white hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Chat
+                    </Link>
                   <button
                     onClick={handleLogout}
                     className="text-white hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
@@ -223,6 +229,14 @@ const Navbar = () => {
                       className="text-white hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
                     >
                       Research
+                    </Link>
+                  </motion.div>
+                  <motion.div variants={menuItemVariants}>
+                    <Link
+                      to="/chat"
+                      className="text-white hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+                    >
+                      Chat
                     </Link>
                   </motion.div>
 

@@ -1,7 +1,6 @@
 import express, { urlencoded } from "express";
 import dotenv from "dotenv";
 import mongoDBConnect from "./database/mongoose.database.js";
-import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 import cookieParser from "cookie-parser";
@@ -26,8 +25,6 @@ const io = initializeSocket(server);
 // Make io accessible in routes
 app.set('io', io);
 
-// Enable CORS for all routes
-app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser());

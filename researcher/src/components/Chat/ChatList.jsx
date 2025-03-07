@@ -13,7 +13,7 @@ import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ScrollArea } from "../ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
 const ChatList = () => {
@@ -25,6 +25,7 @@ const ChatList = () => {
     currentChat,
     setCurrentChat,
     onlineUsers,
+    isLoadingChats,
   } = useChatStore();
 
   const getLastMessagePreview = (chat) => {
@@ -138,24 +139,40 @@ const ChatList = () => {
           </TabsTrigger>
         </TabsList>
         <ScrollArea className="h-[calc(100vh-12rem)]">
-          <TabsContent value="direct" className="m-0 p-4">
-            {directChats.map((chat) => (
-              <ChatItem key={chat._id} chat={chat} />
-            ))}
-            {directChats.length === 0 && (
-              <p className="text-center text-gray-500 mt-4">
-                No direct messages yet
-              </p>
+          <TabsContent value="direct" className="m-0 p-4 relative min-h-[100px]">
+            {isLoadingChats ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+              </div>
+            ) : (
+              <>
+                {directChats.map((chat) => (
+                  <ChatItem key={chat._id} chat={chat} />
+                ))}
+                {directChats.length === 0 && (
+                  <p className="text-center text-gray-500 mt-4">
+                    No direct messages yet
+                  </p>
+                )}
+              </>
             )}
           </TabsContent>
-          <TabsContent value="groups" className="m-0 p-4">
-            {groupChats.map((chat) => (
-              <ChatItem key={chat._id} chat={chat} />
-            ))}
-            {groupChats.length === 0 && (
-              <p className="text-center text-gray-500 mt-4">
-                No group chats yet
-              </p>
+          <TabsContent value="groups" className="m-0 p-4 relative min-h-[100px]">
+            {isLoadingChats ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+              </div>
+            ) : (
+              <>
+                {groupChats.map((chat) => (
+                  <ChatItem key={chat._id} chat={chat} />
+                ))}
+                {groupChats.length === 0 && (
+                  <p className="text-center text-gray-500 mt-4">
+                    No group chats yet
+                  </p>
+                )}
+              </>
             )}
           </TabsContent>
         </ScrollArea>

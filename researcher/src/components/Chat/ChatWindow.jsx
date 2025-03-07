@@ -44,6 +44,7 @@ const ChatWindow = () => {
     typingUsers,
     socket,
     initializeSocket,
+    isLoadingMessages,
   } = useChatStore();
   const [newMessage, setNewMessage] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -304,10 +305,16 @@ const ChatWindow = () => {
         </div>
       </CardHeader>
 
-      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4">
-        {messages.map((message) => (
-          <MessageBubble key={message._id} message={message} />
-        ))}
+      <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 relative">
+        {isLoadingMessages ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          </div>
+        ) : (
+          messages.map((message) => (
+            <MessageBubble key={message._id} message={message} />
+          ))
+        )}
         {Array.from(typingUsers.keys()).map((userId) => {
           const typingUser = currentChat.members?.find(
             (m) => m._id === userId

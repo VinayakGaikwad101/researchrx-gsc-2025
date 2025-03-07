@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { playNotificationSound } from "../assets/sounds/notification";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -11,7 +12,9 @@ const useChatStore = create((set, get) => ({
   currentChat: null,
   messages: [],
   researchers: [],
-  isLoading: false,
+  isLoadingMessages: false,
+  isLoadingChats: false,
+  isLoadingResearchers: false,
   typingUsers: new Map(),
   onlineUsers: new Set(),
 
@@ -24,6 +27,9 @@ const useChatStore = create((set, get) => ({
     const socket = io(SERVER_URL, {
       auth: { token },
       withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socket.on("connect", () => {
@@ -34,42 +40,72 @@ const useChatStore = create((set, get) => ({
       }
     });
 
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      // Retry connection with exponential backoff
+      socket.io.opts.reconnectionDelay *= 2;
+    });
+
+    socket.on("reconnect", (attemptNumber) => {
+      console.log("Socket reconnected after", attemptNumber, "attempts");
+      socket.io.opts.reconnectionDelay = 1000; // Reset delay
+      const { currentChat } = get();
+      if (currentChat?.members) {
+        socket.emit("join_group", currentChat._id);
+      }
+    });
+
     socket.on("online_users", (users) => {
-      set({ onlineUsers: new Set(users) });
+      set((state) => {
+        const newState = { ...state };
+        newState.onlineUsers = new Set(users);
+        return newState;
+      });
     });
 
     // Handle incoming messages
     socket.on("receive_message", (message) => {
       console.log("Received message:", message);
-      const { currentChat } = get();
       
-      // Update messages if in current chat
-      if (currentChat && message.chat === currentChat._id) {
-        set((state) => ({
-          messages: [...state.messages.filter(m => !m.isOptimistic), message]
-        }));
-      }
-
-      // Update chat lists
       set((state) => {
+        // Create a new state object
+        const newState = { ...state };
+
+        // Update chat lists
         const updateChat = (chat) => 
           chat._id === message.chat ? { ...chat, lastMessage: message } : chat;
 
-        return {
-          directChats: state.directChats.map(updateChat),
-          groupChats: state.groupChats.map(updateChat)
-        };
+        newState.directChats = state.directChats.map(updateChat);
+        newState.groupChats = state.groupChats.map(updateChat);
+
+        // Update messages if we're in the relevant chat
+        if (state.currentChat && message.chat === state.currentChat._id) {
+          // Avoid duplicate messages
+          const messageExists = state.messages.some(msg => msg._id === message._id);
+          if (!messageExists) {
+            newState.messages = [...state.messages, message];
+          }
+        }
+
+        return newState;
       });
+
+      // Play notification sound for incoming messages
+      if (message.senderId !== get().socket?.auth?.userId) {
+        playNotificationSound();
+      }
     });
 
     socket.on("message_deleted", (messageId) => {
-      set((state) => ({
-        messages: state.messages.map((msg) =>
+      set((state) => {
+        const newState = { ...state };
+        newState.messages = state.messages.map((msg) =>
           msg._id === messageId
             ? { ...msg, isDeleted: true, content: "This message was deleted" }
             : msg
-        ),
-      }));
+        );
+        return newState;
+      });
     });
 
     socket.on("user_typing", ({ userId, chatId }) => {
@@ -79,22 +115,44 @@ const useChatStore = create((set, get) => ({
       }
     });
 
-    set({ socket });
+    set((state) => {
+      const newState = { ...state };
+      newState.socket = socket;
+      return newState;
+    });
   },
 
   // Researcher Management
   fetchResearchers: async () => {
     try {
+      set((state) => {
+        const newState = { ...state };
+        newState.isLoadingResearchers = true;
+        return newState;
+      });
+
       const response = await axios.get(`${SERVER_URL}/api/chat/researchers`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         withCredentials: true,
       });
-      set({ researchers: response.data });
+
+      set((state) => {
+        const newState = { ...state };
+        newState.researchers = response.data;
+        newState.isLoadingResearchers = false;
+        return newState;
+      });
+
       return response.data;
     } catch (error) {
       console.error("Error fetching researchers:", error);
+      set((state) => {
+        const newState = { ...state };
+        newState.isLoadingResearchers = false;
+        return newState;
+      });
       throw error;
     }
   },
@@ -114,10 +172,12 @@ const useChatStore = create((set, get) => ({
       );
 
       // Update group chats list
-      set((state) => ({
-        groupChats: [...state.groupChats, response.data],
-        currentChat: response.data,
-      }));
+      set((state) => {
+        const newState = { ...state };
+        newState.groupChats = [...state.groupChats, response.data];
+        newState.currentChat = response.data;
+        return newState;
+      });
 
       // Join the socket room for the new group
       const { socket } = get();
@@ -145,10 +205,12 @@ const useChatStore = create((set, get) => ({
           withCredentials: true,
         }
       );
-      set((state) => ({
-        directChats: [...state.directChats, response.data],
-        currentChat: response.data,
-      }));
+      set((state) => {
+        const newState = { ...state };
+        newState.directChats = [...state.directChats, response.data];
+        newState.currentChat = response.data;
+        return newState;
+      });
       return response.data;
     } catch (error) {
       console.error("Error creating direct chat:", error);
@@ -158,7 +220,14 @@ const useChatStore = create((set, get) => ({
 
   fetchChats: async () => {
     try {
-      set({ isLoading: true });
+      set((state) => {
+        const newState = { ...state };
+        newState.isLoadingChats = true;
+        newState.directChats = [];
+        newState.groupChats = [];
+        return newState;
+      });
+
       const token = localStorage.getItem("authToken");
       const response = await axios.get(`${SERVER_URL}/api/chat/list`, {
         headers: {
@@ -166,18 +235,34 @@ const useChatStore = create((set, get) => ({
         },
         withCredentials: true,
       });
-      const { directChats, groupChats } = response.data;
-      set({ directChats, groupChats, isLoading: false });
+
+      set((state) => {
+        const newState = { ...state };
+        newState.directChats = response.data.directChats;
+        newState.groupChats = response.data.groupChats;
+        newState.isLoadingChats = false;
+        return newState;
+      });
     } catch (error) {
       console.error("Error fetching chats:", error);
-      set({ isLoading: false });
+      set((state) => {
+        const newState = { ...state };
+        newState.isLoadingChats = false;
+        return newState;
+      });
+      throw error;
     }
   },
 
   // Message Management
   fetchMessages: async (chatId, chatType) => {
     try {
-      set({ isLoading: true });
+      set((state) => {
+        const newState = { ...state };
+        newState.isLoadingMessages = true;
+        return newState;
+      });
+
       const response = await axios.get(
         `${SERVER_URL}/api/chat/messages/${chatId}/${chatType}`,
         {
@@ -187,15 +272,30 @@ const useChatStore = create((set, get) => ({
           withCredentials: true,
         }
       );
-      set({ messages: response.data, isLoading: false });
+
+      set((state) => {
+        const newState = { ...state };
+        newState.messages = response.data;
+        newState.isLoadingMessages = false;
+        return newState;
+      });
     } catch (error) {
       console.error("Error fetching messages:", error);
-      set({ isLoading: false });
+      set((state) => {
+        const newState = { ...state };
+        newState.isLoadingMessages = false;
+        return newState;
+      });
     }
   },
 
   uploadFile: async (file, chatId, chatType) => {
     try {
+      const { currentChat } = get();
+      const recipientId = chatType === "direct" 
+        ? currentChat.participants.find(p => p._id !== get().socket?.auth?.userId)?._id 
+        : undefined;
+
       const formData = new FormData();
       formData.append('file', file);
 
@@ -212,23 +312,27 @@ const useChatStore = create((set, get) => ({
       );
 
       // Update messages immediately
-      set((state) => ({
-        messages: [...state.messages, response.data]
-      }));
-
-      // Update chat lists
       set((state) => {
+        const newState = { ...state };
+        newState.messages = [...state.messages, response.data];
+        return newState;
+      });
+
+      // Update chat lists with immutable state update
+      set((state) => {
+        const newState = { ...state };
+        
         if (chatType === "direct") {
-          const updatedDirectChats = state.directChats.map((chat) =>
+          newState.directChats = state.directChats.map((chat) =>
             chat._id === chatId ? { ...chat, lastMessage: response.data } : chat
           );
-          return { directChats: updatedDirectChats };
         } else {
-          const updatedGroupChats = state.groupChats.map((chat) =>
+          newState.groupChats = state.groupChats.map((chat) =>
             chat._id === chatId ? { ...chat, lastMessage: response.data } : chat
           );
-          return { groupChats: updatedGroupChats };
         }
+        
+        return newState;
       });
 
       // Emit to socket
@@ -238,7 +342,7 @@ const useChatStore = create((set, get) => ({
           ...response.data,
           chatType,
           chat: chatId,
-          recipientId: chatType === "direct" ? chatId : undefined,
+          recipientId,
           groupId: chatType === "group" ? chatId : undefined,
         });
       }
@@ -252,6 +356,11 @@ const useChatStore = create((set, get) => ({
 
   sendMessage: async (content, chatId, chatType) => {
     try {
+      const { currentChat } = get();
+      const recipientId = chatType === "direct" 
+        ? currentChat.participants.find(p => p._id !== get().socket?.auth?.userId)?._id 
+        : undefined;
+
       const response = await axios.post(
         `${SERVER_URL}/api/chat/message`,
         { content, chatId, chatType },
@@ -264,23 +373,27 @@ const useChatStore = create((set, get) => ({
       );
 
       // Update messages immediately
-      set((state) => ({
-        messages: [...state.messages, response.data]
-      }));
-
-      // Update chat lists
       set((state) => {
+        const newState = { ...state };
+        newState.messages = [...state.messages, response.data];
+        return newState;
+      });
+
+      // Update chat lists with immutable state update
+      set((state) => {
+        const newState = { ...state };
+        
         if (chatType === "direct") {
-          const updatedDirectChats = state.directChats.map((chat) =>
+          newState.directChats = state.directChats.map((chat) =>
             chat._id === chatId ? { ...chat, lastMessage: response.data } : chat
           );
-          return { directChats: updatedDirectChats };
         } else {
-          const updatedGroupChats = state.groupChats.map((chat) =>
+          newState.groupChats = state.groupChats.map((chat) =>
             chat._id === chatId ? { ...chat, lastMessage: response.data } : chat
           );
-          return { groupChats: updatedGroupChats };
         }
+        
+        return newState;
       });
 
       // Emit to socket
@@ -290,7 +403,7 @@ const useChatStore = create((set, get) => ({
           ...response.data,
           chatType,
           chat: chatId,
-          recipientId: chatType === "direct" ? chatId : undefined,
+          recipientId,
           groupId: chatType === "group" ? chatId : undefined,
         });
       }
@@ -304,6 +417,12 @@ const useChatStore = create((set, get) => ({
 
   deleteMessage: async (messageId) => {
     try {
+      const { socket, currentChat } = get();
+      const chatType = currentChat.members ? "group" : "direct";
+      const recipientId = chatType === "direct"
+        ? currentChat.participants.find(p => p._id !== socket.auth.userId)?._id
+        : undefined;
+
       const response = await axios.delete(
         `${SERVER_URL}/api/chat/message/${messageId}`,
         {
@@ -314,26 +433,26 @@ const useChatStore = create((set, get) => ({
         }
       );
 
-      const { socket, currentChat } = get();
-      if (socket) {
-        socket.emit("delete_message", {
-          messageId,
-          chatType: currentChat.members ? "group" : "direct",
-          recipientId: currentChat.members
-            ? undefined
-            : currentChat.participants.find((p) => p._id !== socket.auth.userId)
-                ?._id,
-          groupId: currentChat.members ? currentChat._id : undefined,
-        });
-      }
-
-      set((state) => ({
-        messages: state.messages.map((msg) =>
+      // Update messages with immutable state update
+      set((state) => {
+        const newState = { ...state };
+        newState.messages = state.messages.map((msg) =>
           msg._id === messageId
             ? { ...msg, isDeleted: true, content: "This message was deleted" }
             : msg
-        ),
-      }));
+        );
+        return newState;
+      });
+
+      // Emit to socket
+      if (socket) {
+        socket.emit("delete_message", {
+          messageId,
+          chatType,
+          recipientId,
+          groupId: chatType === "group" ? currentChat._id : undefined,
+        });
+      }
 
       return response.data;
     } catch (error) {
@@ -344,9 +463,23 @@ const useChatStore = create((set, get) => ({
 
   // UI State Management
   setCurrentChat: (chat) => {
-    set({ currentChat: chat });
+    set((state) => {
+      const newState = { ...state };
+      newState.currentChat = chat;
+      newState.messages = [];
+      return newState;
+    });
+
     if (chat) {
-      get().fetchMessages(chat._id, chat.members ? "group" : "direct");
+      get().fetchMessages(chat._id, chat.members ? "group" : "direct")
+        .catch(() => {
+          // Reset loading state in case of error
+          set((state) => {
+            const newState = { ...state };
+            newState.isLoadingMessages = false;
+            return newState;
+          });
+        });
       const { socket } = get();
       if (socket && chat.members) {
         socket.emit("join_group", chat._id);
@@ -357,25 +490,31 @@ const useChatStore = create((set, get) => ({
   setTypingUser: (userId) => {
     const typingTimeout = setTimeout(() => {
       set((state) => {
-        const newTypingUsers = new Map(state.typingUsers);
-        newTypingUsers.delete(userId);
-        return { typingUsers: newTypingUsers };
+        const newState = { ...state };
+        newState.typingUsers = new Map(state.typingUsers);
+        newState.typingUsers.delete(userId);
+        return newState;
       });
     }, 3000);
 
     set((state) => {
-      const newTypingUsers = new Map(state.typingUsers);
-      newTypingUsers.set(userId, typingTimeout);
-      return { typingUsers: newTypingUsers };
+      const newState = { ...state };
+      newState.typingUsers = new Map(state.typingUsers);
+      newState.typingUsers.set(userId, typingTimeout);
+      return newState;
     });
   },
 
   emitTyping: (chatId, chatType) => {
-    const { socket } = get();
+    const { socket, currentChat } = get();
     if (socket) {
+      const recipientId = chatType === "direct"
+        ? currentChat.participants.find(p => p._id !== socket.auth.userId)?._id
+        : undefined;
+
       socket.emit("typing", {
         chatType,
-        recipientId: chatType === "direct" ? chatId : undefined,
+        recipientId,
         groupId: chatType === "group" ? chatId : undefined,
       });
     }
@@ -387,16 +526,21 @@ const useChatStore = create((set, get) => ({
       socket.disconnect();
     }
     typingUsers.forEach((timeout) => clearTimeout(timeout));
-    set({
-      socket: null,
-      directChats: [],
-      groupChats: [],
-      currentChat: null,
-      messages: [],
-      researchers: [],
-      isLoading: false,
-      typingUsers: new Map(),
-      onlineUsers: new Set(),
+    
+    set((state) => {
+      const newState = { ...state };
+      newState.socket = null;
+      newState.directChats = [];
+      newState.groupChats = [];
+      newState.currentChat = null;
+      newState.messages = [];
+      newState.researchers = [];
+      newState.isLoadingMessages = false;
+      newState.isLoadingChats = false;
+      newState.isLoadingResearchers = false;
+      newState.typingUsers = new Map();
+      newState.onlineUsers = new Set();
+      return newState;
     });
   },
 }));

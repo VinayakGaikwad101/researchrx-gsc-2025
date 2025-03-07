@@ -426,6 +426,20 @@ export const sendMessage = async (req, res) => {
         })
       });
 
+    // Get io instance and emit to appropriate rooms
+    const io = req.app.get('io');
+    if (chatType === "direct") {
+      // Get recipient ID
+      const recipientId = chat.participants.find(id => id.toString() !== senderId);
+      // Emit to recipient's room
+      io.to(recipientId.toString()).emit("receive_message", populatedMessage);
+      // Emit to sender's room
+      io.to(senderId).emit("receive_message", populatedMessage);
+    } else {
+      // Emit to group room
+      io.to(chatId).emit("receive_message", populatedMessage);
+    }
+
     return res.status(201).json(populatedMessage);
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -475,6 +489,20 @@ export const deleteMessage = async (req, res) => {
     message.isDeleted = true;
     message.content = "This message was deleted";
     await message.save();
+
+    // Get io instance and emit delete event
+    const io = req.app.get('io');
+    if (message.chatType === "direct") {
+      const chat = await Chat.findById(message.chat);
+      const recipientId = chat.participants.find(id => id.toString() !== userId);
+      // Emit to recipient's room
+      io.to(recipientId.toString()).emit("message_deleted", messageId);
+      // Emit to sender's room
+      io.to(userId).emit("message_deleted", messageId);
+    } else {
+      // Emit to group room
+      io.to(message.chat.toString()).emit("message_deleted", messageId);
+    }
 
     return res.status(200).json(message);
   } catch (error) {
@@ -527,6 +555,20 @@ export const uploadFile = async (req, res) => {
           photo: doc.avataar || "default_avatar.png"
         })
       });
+
+    // Get io instance and emit to appropriate rooms
+    const io = req.app.get('io');
+    if (chatType === "direct") {
+      const chat = await Chat.findById(chatId);
+      const recipientId = chat.participants.find(id => id.toString() !== senderId);
+      // Emit to recipient's room
+      io.to(recipientId.toString()).emit("receive_message", populatedMessage);
+      // Emit to sender's room
+      io.to(senderId).emit("receive_message", populatedMessage);
+    } else {
+      // Emit to group room
+      io.to(chatId).emit("receive_message", populatedMessage);
+    }
 
     return res.status(201).json(populatedMessage);
   } catch (error) {

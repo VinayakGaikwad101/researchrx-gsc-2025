@@ -47,25 +47,30 @@ export const initializeSocket = (server) => {
 
     // Handle new messages
     socket.on("send_message", async (data) => {
+      const messageData = {
+        ...data,
+        senderId: socket.user.id
+      };
+
       if (data.chatType === "direct") {
-        // Broadcast to both sender and recipient
-        io.to([socket.user.id, data.recipientId]).emit("receive_message", {
-          ...data,
-          senderId: socket.user.id
-        });
+        // Emit to recipient's user room
+        io.to(data.recipientId).emit("receive_message", messageData);
+        
+        // Emit to sender's user room (including all their tabs/windows)
+        io.to(socket.user.id).emit("receive_message", messageData);
       } else if (data.chatType === "group") {
-        // Broadcast to the entire group
-        io.to(data.groupId).emit("receive_message", {
-          ...data,
-          senderId: socket.user.id
-        });
+        // Broadcast to the entire group including sender
+        io.to(data.groupId).emit("receive_message", messageData);
       }
     });
 
     // Handle message deletion
     socket.on("delete_message", (data) => {
       if (data.chatType === "direct") {
-        io.to([socket.user.id, data.recipientId]).emit("message_deleted", data.messageId);
+        // Emit to recipient's user room
+        io.to(data.recipientId).emit("message_deleted", data.messageId);
+        // Emit to sender's user room (including all their tabs/windows)
+        io.to(socket.user.id).emit("message_deleted", data.messageId);
       } else if (data.chatType === "group") {
         io.to(data.groupId).emit("message_deleted", data.messageId);
       }
@@ -74,11 +79,13 @@ export const initializeSocket = (server) => {
     // Handle typing status
     socket.on("typing", (data) => {
       if (data.chatType === "direct") {
-        socket.to(data.recipientId).emit("user_typing", {
+        // Emit to recipient's user room
+        io.to(data.recipientId).emit("user_typing", {
           userId: socket.user.id,
           chatId: data.recipientId
         });
       } else if (data.chatType === "group") {
+        // Broadcast to all members in the group except sender
         socket.to(data.groupId).emit("user_typing", {
           userId: socket.user.id,
           chatId: data.groupId

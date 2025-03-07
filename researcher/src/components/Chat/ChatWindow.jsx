@@ -53,13 +53,31 @@ const ChatWindow = () => {
   const messagesEndRef = useRef(null);
   const scrollAreaRef = useRef(null);
 
-  // Initialize socket connection
+  // Initialize socket connection and set up polling
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token && !socket) {
       initializeSocket(token);
     }
-  }, []);
+
+    if (currentChat) {
+      const chatType = currentChat.members ? "group" : "direct";
+      
+      // Function to fetch messages without loading state
+      const fetchLatestMessages = async () => {
+        await useChatStore.getState().fetchMessages(currentChat._id, chatType, false);
+        scrollToBottom();
+      };
+
+      // Initial fetch
+      fetchLatestMessages();
+
+      // Set up 5-second polling
+      const pollInterval = setInterval(fetchLatestMessages, 5000);
+
+      return () => clearInterval(pollInterval);
+    }
+  }, [currentChat, socket]);
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -306,15 +324,9 @@ const ChatWindow = () => {
       </CardHeader>
 
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 relative">
-        {isLoadingMessages ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        ) : (
-          messages.map((message) => (
-            <MessageBubble key={message._id} message={message} />
-          ))
-        )}
+        {messages.map((message) => (
+          <MessageBubble key={message._id} message={message} />
+        ))}
         {Array.from(typingUsers.keys()).map((userId) => {
           const typingUser = currentChat.members?.find(
             (m) => m._id === userId

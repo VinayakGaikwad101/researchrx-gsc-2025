@@ -27,20 +27,7 @@ const io = initializeSocket(server);
 app.set('io', io);
 
 // Enable CORS for all routes
-app.use(
-  cors({
-    origin: [
-      process.env.PATIENT_FRONTEND_URL,
-      process.env.RESEARCHER_FRONTEND_URL,
-      'https://researcher-researchrx.vercel.app',
-      'https://patient-researchrx.vercel.app',
-      'http://localhost:5173',
-      'http://localhost:5174'
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
-  })
-);
+app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser());

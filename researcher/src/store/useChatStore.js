@@ -99,6 +99,39 @@ const useChatStore = create((set, get) => ({
     }
   },
 
+  // Group Management
+  createGroup: async ({ name, description, members }) => {
+    try {
+      const response = await axios.post(
+        `${SERVER_URL}/api/chat/group`,
+        { name, description, members },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Update group chats list
+      set((state) => ({
+        groupChats: [...state.groupChats, response.data],
+        currentChat: response.data,
+      }));
+
+      // Join the socket room for the new group
+      const { socket } = get();
+      if (socket) {
+        socket.emit("join_group", response.data._id);
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error creating group:", error);
+      throw error;
+    }
+  },
+
   // Chat Management
   createDirectChat: async (recipientId) => {
     try {
@@ -158,6 +191,62 @@ const useChatStore = create((set, get) => ({
     } catch (error) {
       console.error("Error fetching messages:", error);
       set({ isLoading: false });
+    }
+  },
+
+  uploadFile: async (file, chatId, chatType) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post(
+        `${SERVER_URL}/api/chat/upload/${chatId}/${chatType}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Update messages immediately
+      set((state) => ({
+        messages: [...state.messages, response.data]
+      }));
+
+      // Update chat lists
+      set((state) => {
+        if (chatType === "direct") {
+          const updatedDirectChats = state.directChats.map((chat) =>
+            chat._id === chatId ? { ...chat, lastMessage: response.data } : chat
+          );
+          return { directChats: updatedDirectChats };
+        } else {
+          const updatedGroupChats = state.groupChats.map((chat) =>
+            chat._id === chatId ? { ...chat, lastMessage: response.data } : chat
+          );
+          return { groupChats: updatedGroupChats };
+        }
+      });
+
+      // Emit to socket
+      const { socket } = get();
+      if (socket) {
+        socket.emit("send_message", {
+          ...response.data,
+          chatType,
+          chat: chatId,
+          recipientId: chatType === "direct" ? chatId : undefined,
+          groupId: chatType === "group" ? chatId : undefined,
+        });
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error;
     }
   },
 

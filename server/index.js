@@ -27,46 +27,20 @@ const io = initializeSocket(server);
 app.set('io', io);
 
 // Enable CORS for all routes
-app.use((req, res, next) => {
-  const allowedOrigins = [
-    process.env.PATIENT_FRONTEND_URL,
-    process.env.RESEARCHER_FRONTEND_URL,
-    'https://researcher-researchrx.vercel.app',
-    'https://patient-researchrx.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:5174'
-  ].filter(Boolean); // Remove any undefined values
-
-  const origin = req.headers.origin;
-  
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
-  
-  // Handle preflight
-  if (req.method === 'OPTIONS') {
-    // Always set Allow-Origin for OPTIONS to handle preflight properly
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    return res.status(204).end();
-  }
-  
-  // Handle actual request
-  if (!origin || allowedOrigins.includes(origin)) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    // or requests from allowed origins
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-    next();
-  } else {
-    // For disallowed origins
-    res.status(403).json({ error: 'Not allowed by CORS' });
-  }
-});
+app.use(
+  cors({
+    origin: [
+      process.env.PATIENT_FRONTEND_URL,
+      process.env.RESEARCHER_FRONTEND_URL,
+      'https://researcher-researchrx.vercel.app',
+      'https://patient-researchrx.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:5174'
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());

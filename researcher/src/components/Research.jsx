@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Search, Loader, X } from "lucide-react";
 import DrugSearch from "./DrugSearch";
+import MoleculeViewer from "./MoleculeViewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -137,15 +138,19 @@ const Research = () => {
   return (
     <div className="container mx-auto p-4">
       <Tabs defaultValue="drugs" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="drugs">Drug Search</TabsTrigger>
           <TabsTrigger value="papers">Research Papers</TabsTrigger>
+          <TabsTrigger value="molecule">Molecule Viewer</TabsTrigger>
         </TabsList>
         <TabsContent value="drugs">
           <DrugSearch />
         </TabsContent>
         <TabsContent value="papers">
           <ResearchPapers />
+        </TabsContent>
+        <TabsContent value="molecule">
+          <MoleculeViewer />
         </TabsContent>
       </Tabs>
     </div>

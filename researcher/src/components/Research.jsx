@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-import { Search, Loader, X } from "lucide-react"; // Importing icons from Lucide React
+import { Search, Loader, X } from "lucide-react";
+import DrugSearch from "./DrugSearch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-const Research = () => {
+const ResearchPapers = () => {
   const [results, setResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +21,6 @@ const Research = () => {
         `https://openlibrary.org/search.json?q=${query}`
       );
       const data = await response.json();
-      console.log("Fetched Data:", data); // Console log the fetched data
       setResults(data.docs || []);
       setIsLoading(false);
     } catch (error) {
@@ -27,7 +31,7 @@ const Research = () => {
   };
 
   const handleSearch = () => {
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
     fetchResults(searchQuery);
   };
 
@@ -46,39 +50,40 @@ const Research = () => {
   );
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-gray-50 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-        Research Results
-      </h1>
-      <div className="flex items-center mb-6 relative">
-        <input
+    <Card className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Research Papers</h2>
+      <div className="flex items-center gap-2 mb-6">
+        <Input
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
           placeholder="Search Query"
-          className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          className="flex-grow"
         />
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setSearchQuery("")}
-          className="ml-2 text-gray-500 focus:outline-none"
+          className="text-gray-500"
         >
-          <X className="clear-icon" />
-        </button>
-        {isLoading && <Loader className="ml-2 animate-spin text-gray-500" />}
-        <button
-          onClick={handleSearch}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none transition duration-300"
-        >
-          <Search className="mr-2" /> Search
-        </button>
+          <X className="h-4 w-4" />
+        </Button>
+        <Button onClick={handleSearch} className="flex items-center gap-2">
+          {isLoading ? (
+            <Loader className="h-4 w-4 animate-spin" />
+          ) : (
+            <Search className="h-4 w-4" />
+          )}
+          Search
+        </Button>
       </div>
       {error && <p className="text-red-500">{error}</p>}
-      <ul className="space-y-4">
+      <div className="space-y-4">
         {paginatedResults && paginatedResults.length > 0 ? (
           paginatedResults.map((result, index) => (
-            <li
+            <Card
               key={index}
-              className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+              className="p-4 hover:bg-gray-50 transition-colors"
             >
               <h3 className="text-lg font-semibold text-blue-500">
                 {result.title}
@@ -97,41 +102,52 @@ const Research = () => {
               >
                 Read more
               </a>
-            </li>
+            </Card>
           ))
         ) : (
           <p>No results found.</p>
         )}
-      </ul>
+      </div>
       {results.length > pageSize && (
         <div className="flex justify-between items-center mt-6">
-          <button
+          <Button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-lg ${
-              currentPage === 1
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition duration-300"
-            }`}
+            variant={currentPage === 1 ? "secondary" : "default"}
           >
             Previous
-          </button>
+          </Button>
           <span>
             Page {currentPage} of {totalPages}
           </span>
-          <button
+          <Button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-4 py-2 rounded-lg ${
-              currentPage === totalPages
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-blue-500 text-white hover:bg-blue-600 focus:outline-none transition duration-300"
-            }`}
+            variant={currentPage === totalPages ? "secondary" : "default"}
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
+    </Card>
+  );
+};
+
+const Research = () => {
+  return (
+    <div className="container mx-auto p-4">
+      <Tabs defaultValue="drugs" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="drugs">Drug Search</TabsTrigger>
+          <TabsTrigger value="papers">Research Papers</TabsTrigger>
+        </TabsList>
+        <TabsContent value="drugs">
+          <DrugSearch />
+        </TabsContent>
+        <TabsContent value="papers">
+          <ResearchPapers />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

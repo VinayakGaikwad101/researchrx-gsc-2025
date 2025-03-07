@@ -206,7 +206,11 @@ const ChatWindow = () => {
           {!isOwnMessage && (
             <p className="text-xs text-gray-500 mb-1">{message.sender.name}</p>
           )}
-          {message.file ? (
+          {message.isDeleted ? (
+            <p className="text-sm whitespace-pre-wrap break-words">
+              This message was deleted for all
+            </p>
+          ) : message.file ? (
             <a
               href={message.file}
               target="_blank"
@@ -225,21 +229,21 @@ const ChatWindow = () => {
             <span className="text-xs opacity-70">
               {format(new Date(message.createdAt), "h:mm a")}
             </span>
-            {isOwnMessage && !message.isDeleted && (
+          {isOwnMessage && !message.isDeleted && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity absolute -right-7 top-2"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity absolute -left-10 top-1 z-50 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-full p-1"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="start" className="z-50">
                   <DropdownMenuItem onClick={() => handleDeleteMessage(message._id)}>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete Message
+                    Delete for all
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -13,15 +13,22 @@
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie, Accept, Accept-Language, Content-Length, X-Requested-With, Origin, Host",
         "Access-Control-Allow-Credentials": "true",
         "Access-Control-Expose-Headers": "set-cookie"
       },
-      "status": 200
+      "continue": true
     },
     {
       "src": "/(.*)",
-      "dest": "/index.js"
+      "dest": "/index.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie, Accept, Accept-Language, Content-Length, X-Requested-With, Origin, Host",
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Expose-Headers": "set-cookie"
+      }
     }
   ]
 }

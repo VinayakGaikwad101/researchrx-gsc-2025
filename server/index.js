@@ -42,7 +42,7 @@ app.use(function(req, res, next) {
     if (isWhitelisted) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, Accept, Accept-Language, Content-Length, X-Requested-With, Origin, Host');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       res.setHeader('Access-Control-Expose-Headers', 'set-cookie');
     }
@@ -52,7 +52,7 @@ app.use(function(req, res, next) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, Accept, Accept-Language, Content-Length, X-Requested-With, Origin, Host');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Expose-Headers', 'set-cookie');
     res.status(200).end();

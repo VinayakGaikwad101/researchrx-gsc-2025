@@ -33,10 +33,14 @@ app.use(
       "http://localhost:5173",
       "https://researcher-researchrx.vercel.app",
       "https://patient-researchrx.vercel.app",
+      "https://server-researchrx.vercel.app"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    exposedHeaders: ["set-cookie"],
+    preflightContinue: true,
+    optionsSuccessStatus: 204
   })
 );
 

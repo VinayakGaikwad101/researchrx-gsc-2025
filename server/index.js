@@ -25,41 +25,21 @@ const io = initializeSocket(server);
 // Make io accessible in routes
 app.set("io", io);
 
-// CORS configuration
-app.use(function(req, res, next) {
-  const whitelist = [
-    'localhost:5174',
-    'localhost:5173',
-    'researcher-researchrx.vercel.app',
-    'patient-researchrx.vercel.app',
-    'server-researchrx.vercel.app'
-  ];
-  
-  const origin = req.get('origin');
-  
-  if (origin) {
-    const isWhitelisted = whitelist.some(domain => origin.includes(domain));
-    if (isWhitelisted) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, Accept, Accept-Language, Content-Length, X-Requested-With, Origin, Host');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Expose-Headers', 'set-cookie');
-    }
-  }
-
-  // Handle preflight requests
+// Handle CORS preflight requests
+app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    // Handle the preflight request
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins or specify specific origins
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, Accept, Accept-Language, Content-Length, X-Requested-With, Origin, Host');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Expose-Headers', 'set-cookie');
-    res.status(200).end();
-    return;
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow specific headers
+    res.status(200).end(); // Respond with 200 OK and terminate the response
+  } else {
+    // Handle actual request
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
   }
-
-  next();
 });
 
 app.use(express.json());

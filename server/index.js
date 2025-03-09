@@ -1,9 +1,9 @@
 import express, { urlencoded } from "express";
 import dotenv from "dotenv";
 import mongoDBConnect from "./database/mongoose.database.js";
-import path from "path";
 import { createServer } from "http";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import { initializeSocket } from "./config/socket.config.js";
 import authPatientRouter from "./router/patient.router.js";
 import authResearcherRouter from "./router/researcher.router.js";
@@ -23,8 +23,22 @@ const server = createServer(app);
 const io = initializeSocket(server);
 
 // Make io accessible in routes
-app.set('io', io);
+app.set("io", io);
 
+// CORS configuration
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5174",
+      "http://localhost:5173",
+      "https://researcher-researchrx.vercel.app",
+      "https://patient-researchrx.vercel.app",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(express.json());
 app.use(cookieParser());

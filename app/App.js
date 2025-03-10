@@ -6,6 +6,8 @@ import { Platform } from 'react-native';
 // Import screens
 import Welcome from './src/screens/Welcome/Welcome';
 import UserType from './src/screens/Welcome/UserType';
+import PatientLogin from './src/screens/Patient/PatientLogin';
+import ResearcherLogin from './src/screens/Researcher/ResearcherLogin';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,6 +50,20 @@ const App = () => {
           component={UserType}
           options={{
             title: 'Choose Your Role',
+          }}
+        />
+        <Stack.Screen 
+          name="PatientLogin" 
+          component={PatientLogin}
+          options={{
+            title: 'Patient Login',
+          }}
+        />
+        <Stack.Screen 
+          name="ResearcherLogin" 
+          component={ResearcherLogin}
+          options={{
+            title: 'Researcher Login',
           }}
         />
       </Stack.Navigator>

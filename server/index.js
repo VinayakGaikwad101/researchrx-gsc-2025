@@ -25,21 +25,36 @@ const io = initializeSocket(server);
 // Make io accessible in routes
 app.set("io", io);
 
-// Handle CORS preflight requests
+// Configure allowed origins based on environment
+const allowedOrigins = [
+  process.env.PATIENT_FRONTEND_URL,
+  process.env.RESEARCHER_FRONTEND_URL,
+].filter(Boolean); // Remove any undefined values
+
+// Handle CORS
 app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    // Handle the preflight request
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins or specify specific origins
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow specific headers
-    res.status(200).end(); // Respond with 200 OK and terminate the response
-  } else {
-    // Handle actual request
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
+  const origin = req.headers.origin;
+
+  // Check if the origin is in our allowed list
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+
+    // Handle preflight requests
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
   }
+
+  next();
 });
 
 app.use(express.json());

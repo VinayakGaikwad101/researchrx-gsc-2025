@@ -40,6 +40,10 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  loginButtonDisabled: {
+    backgroundColor: '#ccc',
+    opacity: 0.7,
+  },
   linkButton: {
     marginTop: 20,
     alignItems: 'center',

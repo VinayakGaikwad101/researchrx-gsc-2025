@@ -6,8 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch:css": "postcss public/css/tailwind.css -o public/css/styles.css -w",
-    "start": "node index",
-    "dev": "nodemon index"
+    "start": "node index.js",
+    "tunnel": "node startServer.js",
+    "dev": "concurrently \"nodemon index.js\" \"node startServer.js\""
   },
   "keywords": [],
   "author": "",
@@ -39,6 +40,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
+    "chalk": "^5.4.1",
+    "concurrently": "^8.2.2",
+    "localtunnel": "^2.0.2",
     "nodemon": "^3.1.9",
     "postcss": "^8.5.3",
     "postcss-cli": "^10.1.0",

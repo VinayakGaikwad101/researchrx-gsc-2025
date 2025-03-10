@@ -1,15 +1,44 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { styles } from './Researcher.style';
+import { ENDPOINTS, apiCall } from '../../config/api.config';
 
 const ResearcherRegister = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
-    // TODO: Implement registration logic
-    console.log('Researcher register:', { email, password, confirmPassword });
+  const handleRegister = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await apiCall(ENDPOINTS.RESEARCHER_REGISTER, 'POST', {
+        email,
+        password,
+      });
+      
+      console.log('Registration successful:', response);
+      Alert.alert(
+        'Success',
+        'Registration successful! Please check your email for verification.',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+      
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -25,6 +54,7 @@ const ResearcherRegister = ({ navigation }) => {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            editable={!isLoading}
           />
           
           <TextInput
@@ -33,6 +63,7 @@ const ResearcherRegister = ({ navigation }) => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
+            editable={!isLoading}
           />
 
           <TextInput
@@ -41,14 +72,18 @@ const ResearcherRegister = ({ navigation }) => {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
+            editable={!isLoading}
           />
         </View>
 
         <TouchableOpacity 
-          style={styles.loginButton}
+          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
           onPress={handleRegister}
+          disabled={isLoading}
         >
-          <Text style={styles.loginButtonText}>Register</Text>
+          <Text style={styles.loginButtonText}>
+            {isLoading ? 'Registering...' : 'Register'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -1,39 +1,40 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  Platform,
-} from "react-native";
-import { styles } from "./UserType.style";
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
+import { styles } from './UserType.style';
 
 const UserType = ({ navigation }) => {
   const [selectedType, setSelectedType] = useState(null);
 
   const handleOptionPress = (type) => {
     setSelectedType(type);
-    navigation.navigate(`${type}Login`);
+    if (type === 'Patient') {
+      navigation.navigate('PatientAuth', { screen: 'Login' });
+    } else {
+      navigation.navigate('ResearcherAuth', { screen: 'Login' });
+    }
   };
 
   const renderOption = (type, title, description) => {
     const isSelected = selectedType === type;
-    const optionStyles = [styles.option, isSelected && styles.optionSelected];
+    const optionStyles = [
+      styles.option,
+      isSelected && styles.optionSelected
+    ];
 
     return (
-      <TouchableOpacity
+      <TouchableOpacity 
         style={optionStyles}
         onPress={() => handleOptionPress(type)}
-        {...(Platform.OS === "web" && {
-          role: "radio",
-          "aria-checked": isSelected,
+        {...(Platform.OS === 'web' && {
+          role: 'radio',
+          'aria-checked': isSelected,
           tabIndex: 0,
           onClick: () => handleOptionPress(type),
           onKeyPress: (e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (e.key === 'Enter' || e.key === ' ') {
               handleOptionPress(type);
             }
-          },
+          }
         })}
       >
         <Text style={styles.optionTitle}>{title}</Text>
@@ -54,15 +55,15 @@ const UserType = ({ navigation }) => {
 
         <View style={styles.optionsContainer}>
           {renderOption(
-            "Researcher",
+            'Researcher',
             "I'm a Researcher",
-            "Conduct research, recruit participants, and manage studies"
+            'Conduct research, recruit participants, and manage studies'
           )}
 
           {renderOption(
-            "Patient",
+            'Patient',
             "I'm a Patient",
-            "Participate in studies and contribute to medical research"
+            'Participate in studies and contribute to medical research'
           )}
         </View>
       </View>

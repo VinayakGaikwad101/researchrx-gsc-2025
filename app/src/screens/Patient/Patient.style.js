@@ -40,4 +40,13 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  linkButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#007AFF',
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
 });

@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
-import { styles } from './Patient.style';
+import { styles } from './Researcher.style';
 
-const PatientLogin = ({ navigation }) => {
+const ResearcherRegister = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleLogin = () => {
-    // TODO: Implement login logic
-    console.log('Patient login:', { email, password });
+  const handleRegister = () => {
+    // TODO: Implement registration logic
+    console.log('Researcher register:', { email, password, confirmPassword });
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Patient Login</Text>
+        <Text style={styles.title}>Researcher Registration</Text>
         
         <View style={styles.inputContainer}>
           <TextInput
@@ -33,24 +34,25 @@ const PatientLogin = ({ navigation }) => {
             onChangeText={setPassword}
             secureTextEntry
           />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
         </View>
 
         <TouchableOpacity 
           style={styles.loginButton}
-          onPress={handleLogin}
+          onPress={handleRegister}
         >
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.linkButton}
-          onPress={() => navigation.navigate('Register')}
-        >
-          <Text style={styles.linkText}>Don't have an account? Register</Text>
+          <Text style={styles.loginButtonText}>Register</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
 
-export default PatientLogin;
+export default ResearcherRegister;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
 import { styles } from './Researcher.style';
 
-const ResearcherLogin = () => {
+const ResearcherLogin = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -40,6 +40,13 @@ const ResearcherLogin = () => {
           onPress={handleLogin}
         >
           <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.linkButton}
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={styles.linkText}>Don't have an account? Register</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

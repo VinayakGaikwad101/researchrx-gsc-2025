@@ -5,6 +5,9 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   content: {
     flex: 1,
     padding: 20,
@@ -15,42 +18,58 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 30,
     textAlign: 'center',
+    color: '#333',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   inputContainer: {
-    gap: 15,
-    marginBottom: 30,
+    width: '100%',
+    marginBottom: 20,
   },
   input: {
+    width: '100%',
     height: 50,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     paddingHorizontal: 15,
+    marginBottom: 15,
     fontSize: 16,
+    backgroundColor: '#f9f9f9',
   },
   loginButton: {
-    backgroundColor: '#007AFF',
+    width: '100%',
     height: 50,
+    backgroundColor: '#007AFF',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 15,
+  },
+  loginButtonDisabled: {
+    backgroundColor: '#ccc',
   },
   loginButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  loginButtonDisabled: {
-    backgroundColor: '#ccc',
-    opacity: 0.7,
+    fontWeight: 'bold',
   },
   linkButton: {
-    marginTop: 20,
-    alignItems: 'center',
+    padding: 10,
   },
   linkText: {
     color: '#007AFF',
-    fontSize: 14,
-    textDecorationLine: 'underline',
+    fontSize: 16,
+    textAlign: 'center',
   },
+  errorText: {
+    color: '#ff3b30',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+  }
 });

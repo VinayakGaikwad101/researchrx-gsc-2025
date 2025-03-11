@@ -19,12 +19,12 @@ const ResearcherStack = createNativeStackNavigator();
 const PatientAuthNavigator = () => (
   <PatientStack.Navigator>
     <PatientStack.Screen 
-      name="Login" 
+      name="PatientLogin" 
       component={PatientLogin}
       options={{ headerShown: false }}
     />
     <PatientStack.Screen 
-      name="Register" 
+      name="PatientRegister" 
       component={PatientRegister}
       options={{
         title: 'Patient Registration',
@@ -37,12 +37,12 @@ const PatientAuthNavigator = () => (
 const ResearcherAuthNavigator = () => (
   <ResearcherStack.Navigator>
     <ResearcherStack.Screen 
-      name="Login" 
+      name="ResearcherLogin" 
       component={ResearcherLogin}
       options={{ headerShown: false }}
     />
     <ResearcherStack.Screen 
-      name="Register" 
+      name="ResearcherRegister" 
       component={ResearcherRegister}
       options={{
         title: 'Researcher Registration',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { styles } from './Patient.style';
-import { ENDPOINTS, apiCall } from '../../config/api.config';
+import { ENDPOINTS, apiCall, storeAuthData } from '../../config/api.config';
 
 const PatientLogin = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -21,14 +21,27 @@ const PatientLogin = ({ navigation }) => {
         password,
       });
       
-      console.log('Login successful:', response);
-      // TODO: Handle successful login (store token, navigate to main screen, etc.)
-      
+      if (response.success) {
+        // Store token and user data
+        await storeAuthData(response.token, response.user);
+        
+        // Navigate to patient home screen
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'PatientHome' }],
+        });
+      } else {
+        Alert.alert('Error', response.message || 'Login failed');
+      }
     } catch (error) {
       Alert.alert('Error', error.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleForgotPassword = () => {
+    navigation.navigate('ForgotPassword');
   };
 
   return (
@@ -69,10 +82,18 @@ const PatientLogin = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.linkButton}
-          onPress={() => navigation.navigate('Register')}
+          onPress={() => navigation.navigate('PatientRegister')}
           disabled={isLoading}
         >
           <Text style={styles.linkText}>Don't have an account? Register</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.linkButton}
+          onPress={handleForgotPassword}
+          disabled={isLoading}
+        >
+          <Text style={styles.linkText}>Forgot Password?</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

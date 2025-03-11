@@ -1,39 +1,86 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ScrollView } from 'react-native';
 import { styles } from './Researcher.style';
 import { ENDPOINTS, apiCall } from '../../config/api.config';
 
 const ResearcherRegister = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phoneNo: '',
+    dob: '',
+    gender: '',
+    institution: '',
+    researchArea: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = async () => {
-    if (!email || !password || !confirmPassword) {
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.firstName || !formData.lastName || !formData.email || 
+        !formData.password || !formData.confirmPassword || !formData.phoneNo || 
+        !formData.dob || !formData.gender || !formData.institution || 
+        !formData.researchArea) {
       Alert.alert('Error', 'Please fill in all fields');
-      return;
+      return false;
     }
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
-      return;
+      return false;
     }
+
+    if (formData.password.length < 8) {
+      Alert.alert('Error', 'Password should be at least 8 characters long');
+      return false;
+    }
+
+    if (formData.phoneNo.length !== 10) {
+      Alert.alert('Error', 'Phone number should be 10 digits long');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleRegister = async () => {
+    if (!validateForm()) return;
 
     try {
       setIsLoading(true);
       const response = await apiCall(ENDPOINTS.RESEARCHER_REGISTER, 'POST', {
-        email,
-        password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        phoneNo: formData.phoneNo,
+        dob: formData.dob,
+        gender: formData.gender,
+        institution: formData.institution,
+        researchArea: formData.researchArea,
+        role: 'Researcher'
       });
       
-      console.log('Registration successful:', response);
-      Alert.alert(
-        'Success',
-        'Registration successful! Please check your email for verification.',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
-      
+      if (response.success) {
+        Alert.alert(
+          'Success',
+          'Registration successful! Please check your email for verification code.',
+          [{ 
+            text: 'OK', 
+            onPress: () => navigation.navigate('VerifyEmail', { 
+              email: formData.email
+            }) 
+          }]
+        );
+      } else {
+        Alert.alert('Error', response.message || 'Registration failed');
+      }
     } catch (error) {
       Alert.alert('Error', error.message || 'Registration failed');
     } finally {
@@ -43,49 +90,109 @@ const ResearcherRegister = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Researcher Registration</Text>
-        
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!isLoading}
-          />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Researcher Registration</Text>
           
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            editable={!isLoading}
-          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              value={formData.firstName}
+              onChangeText={(value) => handleChange('firstName', value)}
+              editable={!isLoading}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChangeText={(value) => handleChange('lastName', value)}
+              editable={!isLoading}
+            />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            editable={!isLoading}
-          />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={formData.email}
+              onChangeText={(value) => handleChange('email', value)}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isLoading}
+            />
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={formData.password}
+              onChangeText={(value) => handleChange('password', value)}
+              secureTextEntry
+              editable={!isLoading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm Password"
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleChange('confirmPassword', value)}
+              secureTextEntry
+              editable={!isLoading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              value={formData.phoneNo}
+              onChangeText={(value) => handleChange('phoneNo', value)}
+              keyboardType="numeric"
+              maxLength={10}
+              editable={!isLoading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Date of Birth (YYYY-MM-DD)"
+              value={formData.dob}
+              onChangeText={(value) => handleChange('dob', value)}
+              editable={!isLoading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Gender (Male/Female/Other)"
+              value={formData.gender}
+              onChangeText={(value) => handleChange('gender', value)}
+              editable={!isLoading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Institution"
+              value={formData.institution}
+              onChangeText={(value) => handleChange('institution', value)}
+              editable={!isLoading}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Research Area"
+              value={formData.researchArea}
+              onChangeText={(value) => handleChange('researchArea', value)}
+              editable={!isLoading}
+            />
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
+            <Text style={styles.loginButtonText}>
+              {isLoading ? 'Registering...' : 'Register'}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity 
-          style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-          onPress={handleRegister}
-          disabled={isLoading}
-        >
-          <Text style={styles.loginButtonText}>
-            {isLoading ? 'Registering...' : 'Register'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

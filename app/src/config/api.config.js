@@ -14,11 +14,15 @@ export const ENDPOINTS = {
   PATIENT_LOGIN: `${API_BASE_URL}/api/auth/patient/login`,
   PATIENT_REGISTER: `${API_BASE_URL}/api/auth/patient/register`,
   PATIENT_VERIFY_EMAIL: `${API_BASE_URL}/api/auth/patient/verify-email`,
+  PATIENT_FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/patient/forgot-password`,
+  PATIENT_LOGOUT: `${API_BASE_URL}/api/auth/patient/logout`,
   
   // Researcher endpoints
   RESEARCHER_LOGIN: `${API_BASE_URL}/api/main/auth/researcher/login`,
   RESEARCHER_REGISTER: `${API_BASE_URL}/api/main/auth/researcher/register`,
   RESEARCHER_VERIFY_EMAIL: `${API_BASE_URL}/api/main/auth/researcher/verify-email`,
+  RESEARCHER_FORGOT_PASSWORD: `${API_BASE_URL}/api/main/auth/researcher/forgot-password`,
+  RESEARCHER_LOGOUT: `${API_BASE_URL}/api/main/auth/researcher/logout`,
 };
 
 // Token management

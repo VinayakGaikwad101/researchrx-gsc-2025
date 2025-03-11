@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert, ScrollView, Platform } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { styles } from './Patient.style';
 import { ENDPOINTS, apiCall } from '../../config/api.config';
 
@@ -14,10 +16,19 @@ const PatientRegister = ({ navigation }) => {
     dob: '',
     gender: '',
   });
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      handleChange('dob', formattedDate);
+    }
   };
 
   const validateForm = () => {
@@ -142,21 +153,38 @@ const PatientRegister = ({ navigation }) => {
               editable={!isLoading}
             />
 
-            <TextInput
+            <TouchableOpacity
               style={styles.input}
-              placeholder="Date of Birth (YYYY-MM-DD)"
-              value={formData.dob}
-              onChangeText={(value) => handleChange('dob', value)}
-              editable={!isLoading}
-            />
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={formData.dob ? styles.inputText : styles.placeholderText}>
+                {formData.dob || 'Date of Birth (YYYY-MM-DD)'}
+              </Text>
+            </TouchableOpacity>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Gender (Male/Female/Other)"
-              value={formData.gender}
-              onChangeText={(value) => handleChange('gender', value)}
-              editable={!isLoading}
-            />
+            {showDatePicker && (
+              <DateTimePicker
+                value={formData.dob ? new Date(formData.dob) : new Date()}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={handleDateChange}
+                maximumDate={new Date()}
+              />
+            )}
+
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.gender}
+                onValueChange={(value) => handleChange('gender', value)}
+                enabled={!isLoading}
+                style={styles.picker}
+              >
+                <Picker.Item label="Select Gender" value="" />
+                <Picker.Item label="Male" value="Male" />
+                <Picker.Item label="Female" value="Female" />
+                <Picker.Item label="Other" value="Other" />
+              </Picker>
+            </View>
           </View>
 
           <TouchableOpacity 

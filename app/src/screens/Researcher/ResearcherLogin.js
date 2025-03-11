@@ -40,10 +40,6 @@ const ResearcherLogin = ({ navigation }) => {
     }
   };
 
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword');
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -90,7 +86,7 @@ const ResearcherLogin = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.linkButton}
-          onPress={handleForgotPassword}
+          onPress={() => navigation.navigate('ResearcherForgotPassword')}
           disabled={isLoading}
         >
           <Text style={styles.linkText}>Forgot Password?</Text>

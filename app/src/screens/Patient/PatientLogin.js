@@ -1,54 +1,57 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
-import { styles } from './Patient.style';
-import { ENDPOINTS, apiCall, storeAuthData } from '../../config/api.config';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+} from "react-native";
+import { styles } from "./Patient.style";
+import { ENDPOINTS, apiCall, storeAuthData } from "../../config/api.config";
 
 const PatientLogin = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     try {
       setIsLoading(true);
-      const response = await apiCall(ENDPOINTS.PATIENT_LOGIN, 'POST', {
+      const response = await apiCall(ENDPOINTS.PATIENT_LOGIN, "POST", {
         email,
         password,
       });
-      
+
       if (response.success) {
         // Store token and user data
         await storeAuthData(response.token, response.user);
-        
+
         // Navigate to patient home screen
         navigation.reset({
           index: 0,
-          routes: [{ name: 'PatientHome' }],
+          routes: [{ name: "PatientHome" }],
         });
       } else {
-        Alert.alert('Error', response.message || 'Login failed');
+        Alert.alert("Error", response.message || "Login failed");
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Login failed');
+      Alert.alert("Error", error.message || "Login failed");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword');
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Patient Login</Text>
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -59,7 +62,7 @@ const PatientLogin = ({ navigation }) => {
             autoCapitalize="none"
             editable={!isLoading}
           />
-          
+
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -70,27 +73,27 @@ const PatientLogin = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
           onPress={handleLogin}
           disabled={isLoading}
         >
           <Text style={styles.loginButtonText}>
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.linkButton}
-          onPress={() => navigation.navigate('PatientRegister')}
+          onPress={() => navigation.navigate("PatientRegister")}
           disabled={isLoading}
         >
           <Text style={styles.linkText}>Don't have an account? Register</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.linkButton}
-          onPress={handleForgotPassword}
+          onPress={() => navigation.navigate("PatientForgotPassword")}
           disabled={isLoading}
         >
           <Text style={styles.linkText}>Forgot Password?</Text>

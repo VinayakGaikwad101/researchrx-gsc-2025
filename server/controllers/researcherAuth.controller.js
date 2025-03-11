@@ -268,6 +268,7 @@ export const researcherLogin = async (req, res) => {
 
 export const researcherLogout = async (req, res) => {
   res.clearCookie("researcherJWT");
+  console.log("Logout successful");
   return res.status(200).json({
     message: "Logged out successfully",
     success: true,

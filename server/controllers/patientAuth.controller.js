@@ -263,6 +263,7 @@ export const patientLogin = async (req, res) => {
 
 export const patientLogout = async (req, res) => {
   res.clearCookie("patientJWT");
+  console.log("Logout successful");
   return res.status(200).json({
     message: "Logged out successfully",
     success: true,

@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import { motion } from "framer-motion";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Label } from "./ui/label";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,97 +15,161 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await login({ email, password }, navigate);
-    if (
-      response?.message === "Email is not verified. Please verify your email"
-    ) {
-      navigate("/otp-verification");
+    await login({ email, password }, navigate);
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        when: "beforeChildren",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const linkVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    hover: { 
+      scale: 1.02,
+      color: "hsl(var(--primary))",
+      transition: { duration: 0.2 }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Login to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <input type="hidden" name="remember" defaultValue="true" />
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
+    <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        className="max-w-md w-full"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <Card className="w-full">
+          <CardHeader>
+            <motion.div variants={itemVariants}>
+              <CardTitle className="text-3xl font-bold text-center">
+                Welcome Back
+              </CardTitle>
+              <CardDescription className="text-center mt-2">
+                Enter your credentials to access your account
+              </CardDescription>
+            </motion.div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <motion.div variants={itemVariants}>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="Enter your email"
+                />
+              </motion.div>
+              
+              <motion.div variants={itemVariants}>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="Enter your password"
+                />
+              </motion.div>
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link
-                to="/signup"
-                className="font-medium text-teal-600 hover:text-teal-500"
-              >
-                Don't have an account?
-              </Link>
-            </div>
-            <div className="text-sm">
-              <Link
-                to="/forgot-password"
-                className="font-medium text-teal-600 hover:text-teal-500"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-            <div className="text-sm">
-              <Link
-                to="/otp-verification"
-                className="font-medium text-teal-600 hover:text-teal-500"
-              >
-                Email not verified?
-              </Link>
-            </div>
-          </div>
+              <motion.div variants={itemVariants}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                  variant="default"
+                >
+                  {loading ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center space-x-2"
+                    >
+                      <span className="inline-block h-4 w-4 border-2 border-current border-r-transparent rounded-full animate-spin" />
+                      <span>Logging in...</span>
+                    </motion.div>
+                  ) : (
+                    "Login"
+                  )}
+                </Button>
+              </motion.div>
+            </form>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
-              disabled={loading}
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </div>
-        </form>
-      </div>
+            <div className="mt-6 space-y-2">
+              <motion.div 
+                className="text-center"
+                variants={itemVariants}
+              >
+                <motion.div
+                  variants={linkVariants}
+                  whileHover="hover"
+                >
+                  <Link to="/signup" className="text-sm text-muted-foreground hover:text-primary">
+                    Don't have an account?
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.div 
+                className="text-center"
+                variants={itemVariants}
+              >
+                <motion.div
+                  variants={linkVariants}
+                  whileHover="hover"
+                >
+                  <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
+                    Forgot your password?
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.div 
+                className="text-center"
+                variants={itemVariants}
+              >
+                <motion.div
+                  variants={linkVariants}
+                  whileHover="hover"
+                >
+                  <Link to="/otp-verification" className="text-sm text-muted-foreground hover:text-primary">
+                    Email not verified?
+                  </Link>
+                </motion.div>
+              </motion.div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };

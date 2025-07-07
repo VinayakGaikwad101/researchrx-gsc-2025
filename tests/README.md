@@ -1,178 +1,165 @@
-# ResearchRX - Tests
+# Testing Documentation
 
 ## Overview
-This directory contains the test suites for the ResearchRX project, covering unit tests, integration tests, and end-to-end tests for all components of the system.
+This directory contains comprehensive test suites for the ResearchRX application, covering both backend controllers and frontend UI components.
 
-## 🚀 Quick Start
+## Test Structure
+```
+tests/
+├── setup/                  # Test setup and configuration
+│   ├── testDb.js          # Database setup for tests
+│   ├── mockUtils.js       # Common mocks and utilities
+│   └── testSetup.js       # Global test setup
+├── unit/                  # Unit tests
+│   ├── controllers/       # Backend controller tests
+│   │   ├── patientAuth.test.js
+│   │   └── researcherAuth.test.js
+│   └── models/           # Database model tests
+├── integration/          # Integration tests
+│   └── auth/            # Authentication flow tests
+└── ui/                  # UI component tests
+    ├── patient/         # Patient portal components
+    └── researcher/      # Researcher portal components
+```
 
-### Prerequisites
-- Node.js (v19.0.0 or higher)
-- npm or yarn
+## Running Tests
 
-### Installation
+### Install Dependencies
 ```bash
-# Install dependencies
+cd tests
 npm install
 ```
 
-### Running Tests
+### Running All Tests
 ```bash
-# Run all tests
-npm run tests
-
-# Run tests in watch mode
-npm run tests:watch
+npm test
 ```
 
-## 🏗️ Test Structure
-
-```
-tests/
-├── unit/                  # Unit tests
-│   ├── auth/             # Authentication tests
-│   ├── blog/             # Blog functionality tests
-│   └── medical/          # Medical data tests
-├── integration/          # Integration tests
-│   ├── api/             # API endpoint tests
-│   └── database/        # Database operation tests
-├── e2e/                 # End-to-end tests
-│   ├── patient/        # Patient portal tests
-│   └── researcher/     # Researcher portal tests
-└── utils/              # Test utilities and helpers
-```
-
-## 🛠️ Testing Tools
-
-### Testing Framework
-- Vitest - Fast testing framework compatible with Vite
-- Jest-like API for familiar testing patterns
-- Built-in code coverage reporting
-
-### Testing Utilities
-- React Testing Library for component tests
-- MSW (Mock Service Worker) for API mocking
-- Supertest for HTTP assertions
-- Faker.js for generating test data
-
-## 💻 Writing Tests
-
-### Unit Test Example
-```javascript
-import { describe, it, expect } from 'vitest'
-import { sum } from '../sum'
-
-describe('sum function', () => {
-  it('adds two numbers correctly', () => {
-    expect(sum(1, 2)).toBe(3)
-  })
-})
-```
-
-### Component Test Example
-```javascript
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
-import Login from '../components/Login'
-
-describe('Login Component', () => {
-  it('renders login form', () => {
-    render(<Login />)
-    expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
-  })
-})
-```
-
-### API Test Example
-```javascript
-import { describe, it, expect } from 'vitest'
-import request from 'supertest'
-import app from '../server'
-
-describe('Auth API', () => {
-  it('should login user with valid credentials', async () => {
-    const res = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'test@example.com',
-        password: 'password123'
-      })
-    expect(res.status).toBe(200)
-    expect(res.body).toHaveProperty('token')
-  })
-})
-```
-
-## 📊 Code Coverage
-
-To generate code coverage reports:
+### Running Specific Test Suites
 ```bash
-npm run tests:coverage
+# Run UI tests only
+npm run test ui/
+
+# Run controller tests only
+npm run test unit/controllers/
+
+# Run with coverage
+npm run test:coverage
+
+# Run in watch mode
+npm run test:watch
+
+# Run with UI
+npm run test:ui
 ```
 
-Coverage reports will be available in the `coverage` directory.
+## Test Coverage Areas
 
-## 🔍 Test Categories
+### Backend Controllers
+- Authentication (Patient & Researcher)
+  - Registration
+  - Login
+  - Email verification
+  - Password reset
+- Data validation
+- Error handling
+- JWT token management
 
-### Unit Tests
-- Individual component testing
-- Utility function testing
-- State management testing
-- Form validation testing
+### UI Components
+- Form validations
+- User interactions
+- Navigation flows
+- Error states
+- Loading states
+- Component rendering
 
-### Integration Tests
-- API endpoint testing
-- Database operations testing
-- Authentication flow testing
-- File upload testing
+## Writing Tests
 
-### End-to-End Tests
-- User journey testing
-- Cross-component interaction testing
-- Real-world scenario testing
+### Controller Tests
+```javascript
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { testDb } from '../../setup/testDb';
 
-## 🤝 Contributing
+describe('Controller Name', () => {
+  beforeEach(async () => {
+    await testDb.connect();
+  });
 
-### Adding New Tests
-1. Create test file in appropriate directory
-2. Follow existing test patterns
-3. Include meaningful test descriptions
-4. Test both success and failure cases
+  afterEach(async () => {
+    await testDb.clearDatabase();
+  });
 
-### Test Guidelines
-- Write clear test descriptions
-- Use meaningful variable names
-- Mock external dependencies
-- Clean up after tests
-- Keep tests independent
+  it('should do something', async () => {
+    // Test implementation
+  });
+});
+```
 
-## 🐛 Debugging Tests
+### UI Component Tests
+```javascript
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
-### Common Issues
-- Async test timing
-- Component mounting/unmounting
-- State management
-- API mocking
+describe('Component Name', () => {
+  it('renders correctly', () => {
+    const { getByText } = render(<Component />);
+    expect(getByText('Expected Text')).toBeTruthy();
+  });
 
-### Debugging Tools
-- Vitest UI for visual debugging
-- Console logging
-- Error stack traces
-- Test isolation
+  it('handles user interaction', async () => {
+    const { getByText } = render(<Component />);
+    fireEvent.press(getByText('Button Text'));
+    await waitFor(() => {
+      // Assert expected behavior
+    });
+  });
+});
+```
 
-## 📝 Best Practices
+## Mocking
 
-1. Follow AAA pattern (Arrange, Act, Assert)
-2. Keep tests focused and atomic
-3. Use meaningful test descriptions
+### API Calls
+```javascript
+jest.mock('../../config/api.config', () => ({
+  apiCall: jest.fn(),
+  // Other mocked functions
+}));
+```
+
+### Navigation
+```javascript
+const mockNavigation = {
+  navigate: jest.fn(),
+  reset: jest.fn()
+};
+```
+
+## Best Practices
+1. Use descriptive test names
+2. Test both success and failure cases
+3. Clean up after each test
 4. Mock external dependencies
-5. Clean up after tests
-6. Maintain test independence
+5. Test edge cases
+6. Keep tests focused and atomic
+7. Use setup and teardown hooks appropriately
 
-## 📞 Support
-For support, contact vinaayakgaikwad@gmail.com
+## Adding New Tests
+1. Create test file in appropriate directory
+2. Import necessary utilities and components
+3. Write tests following existing patterns
+4. Ensure all tests pass before committing
+5. Update test documentation if needed
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+## Troubleshooting
+- Check mock implementations
+- Verify test setup is correct
+- Ensure dependencies are installed
+- Check for async operation handling
+- Verify component props and state
 
----
-Part of ResearchRX - Google Solutions Challenge 2025
+## Contributing
+When adding new features:
+1. Write tests first (TDD approach)
+2. Follow existing test patterns
+3. Update documentation
+4. Ensure all tests pass
+5. Submit PR for review

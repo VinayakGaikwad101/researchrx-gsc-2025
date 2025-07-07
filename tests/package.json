@@ -6,15 +6,27 @@
   "scripts": {
     "start": "node server",
     "dev": "nodemon server",
-    "tests": "vitest",
-    "tests:ui": "vitest --ui"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/react-native": "^12.4.1",
+    "@testing-library/user-event": "^14.5.1",
+    "@vitest/coverage-v8": "^1.0.4",
     "@vitest/ui": "^3.0.6",
+    "jsdom": "^23.0.1",
+    "mongodb-memory-server": "^9.1.1",
+    "msw": "^2.0.11",
+    "react-native-testing-library": "^6.0.0",
+    "supertest": "^6.3.3",
     "vitest": "^3.0.6"
   }
 }

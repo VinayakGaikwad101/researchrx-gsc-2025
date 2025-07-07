@@ -31,31 +31,28 @@ const allowedOrigins = [
   process.env.RESEARCHER_FRONTEND_URL,
 ].filter(Boolean); // Remove any undefined values
 
-// Handle CORS
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Check if the origin is in our allowed list
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-
-    // Handle preflight requests
-    if (req.method === "OPTIONS") {
-      return res.status(200).end();
+// Handle CORS - Simplified for production
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // In production, allow all origins for now
+    if (process.env.NODE_ENV === 'production') {
+      return callback(null, true);
     }
-  }
-
-  next();
-});
+    
+    // In development, check allowed origins
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+}));
 
 app.use(express.json());
 app.use(cookieParser());
